@@ -20,19 +20,19 @@ impl Config {
     }
 
     pub fn new_from_config(path: Option<&str>) -> Self {
-        match home::home_dir() {
-            Some(mut p) => match path {
-                Some(p) => match File::open(p) {
-                    Ok(mut file) => {
-                        let mut contents = String::new();
+        match path {
+            Some(p) => match File::open(p) {
+                Ok(mut file) => {
+                    let mut contents = String::new();
 
-                        file.read_to_string(&mut contents).unwrap();
+                    file.read_to_string(&mut contents).unwrap();
 
-                        serde_json::from_str(contents.as_str()).unwrap()
-                    }
-                    Err(_) => panic!("Config file does not exist."),
-                },
-                None => {
+                    serde_json::from_str(contents.as_str()).unwrap()
+                }
+                Err(_) => panic!("Config file does not exist."),
+            },
+            None => match home::home_dir() {
+                Some(mut p) => {
                     p.push(".config/mvis");
 
                     fs::create_dir_all(&p).unwrap();
@@ -59,8 +59,8 @@ impl Config {
                         }
                     }
                 }
+                None => Self::new(),
             },
-            None => Config::new(),
         }
     }
 
