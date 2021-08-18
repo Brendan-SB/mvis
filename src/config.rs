@@ -7,15 +7,25 @@ use std::io::{Read, Write};
 
 #[derive(Serialize, Deserialize)]
 pub struct Config {
-    pub volume: f32,
-    pub audio_file_name: String,
+    pub volume: Option<f32>,
+    pub audio_file_name: Option<String>,
+    pub config_file_name: Option<String>,
 }
 
 impl Config {
     fn new() -> Self {
-        Config {
-            volume: 1.0,
-            audio_file_name: String::new(),
+        Self {
+            volume: Some(1.0),
+            audio_file_name: Some(String::new()),
+            config_file_name: Some(String::new()),
+        }
+    }
+
+    fn new_blank() -> Self {
+        Self {
+            volume: None,
+            audio_file_name: None,
+            config_file_name: None,
         }
     }
 
@@ -67,38 +77,63 @@ impl Config {
     pub fn update_from_arguments(config: &mut Config) {
         let args: Vec<String> = env::args().collect();
 
-        let mut skip = false;
+        let load_from_json = false;
+        let mut config_updated = Self::new_blank();
 
-        for mut i in 0..args.len() {
-            if skip {
-                skip = false;
+        {
+            let mut skip = false;
 
-                continue;
+            for mut i in 0..args.len() {
+                if skip {
+                    skip = false;
+
+                    continue;
+                }
+
+                if args[i] == "--config" || args[i] == "-c" {
+                    i += 1;
+
+                    if i > args.len() {
+                        break;
+                    }
+
+                    config_updated.config_file_name = Some(args[i].clone());
+
+                    skip = true;
+                } else if args[i] == "--volume" || args[i] == "-v" {
+                    i += 1;
+
+                    if i > args.len() {
+                        break;
+                    }
+
+                    match args[i].trim().parse::<f32>() {
+                        Ok(v) => config_updated.volume = Some(v),
+                        Err(_) => panic!("Volume must be an integer."),
+                    }
+
+                    skip = true;
+                }
             }
 
-            if args[i] == "--config" || args[i] == "-c" {
-                i += 1;
+            if load_from_json {
+                *config =
+                    Self::new_from_config(Some(config_updated.config_file_name.as_ref().unwrap()));
+            }
 
-                if i > args.len() {
-                    break;
-                }
+            match config_updated.volume {
+                Some(_) => config.volume = config_updated.volume,
+                None => {}
+            }
 
-                *config = Self::new_from_config(Some(args[i].trim()));
+            match config_updated.audio_file_name {
+                Some(_) => config.audio_file_name = config_updated.audio_file_name.clone(),
+                None => {},
+            }
 
-                skip = true;
-            } else if args[i] == "--volume" || args[i] == "-v" {
-                i += 1;
-
-                if i > args.len() {
-                    break;
-                }
-
-                match args[i].trim().parse::<f32>() {
-                    Ok(v) => config.volume = v,
-                    Err(_) => panic!("Volume must be an integer."),
-                }
-
-                skip = true;
+            match config_updated.config_file_name {
+                Some(_) => config.config_file_name = config_updated.config_file_name.clone(),
+                None => {},
             }
         }
     }
