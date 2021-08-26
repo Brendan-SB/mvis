@@ -29,48 +29,49 @@ impl Config {
         }
     }
 
-    pub fn new_from_config(path: Option<&str>) -> Self {
-        match path {
-            Some(p) => match File::open(p) {
-                Ok(mut file) => {
-                    let mut contents = String::new();
+    pub fn new_from_base_config() -> Self {
+        match home::home_dir() {
+            Some(mut p) => {
+                p.push(".config/mvis");
 
-                    file.read_to_string(&mut contents).unwrap();
+                fs::create_dir_all(&p).unwrap();
 
-                    serde_json::from_str(contents.as_str()).unwrap()
-                }
-                Err(_) => panic!("Config file does not exist."),
-            },
-            None => match home::home_dir() {
-                Some(mut p) => {
-                    p.push(".config/mvis");
+                p.push("config.json");
 
-                    fs::create_dir_all(&p).unwrap();
+                match File::open(&p) {
+                    Ok(mut file) => {
+                        let mut content = String::new();
 
-                    p.push("config.json");
+                        file.read_to_string(&mut content).unwrap();
 
-                    match File::open(&p) {
-                        Ok(mut file) => {
-                            let mut content = String::new();
+                        serde_json::from_str(&content).unwrap()
+                    }
+                    Err(_) => {
+                        let mut file = File::create(&p).unwrap();
 
-                            file.read_to_string(&mut content).unwrap();
+                        let config = Self::new();
 
-                            serde_json::from_str(&content).unwrap()
-                        }
-                        Err(_) => {
-                            let mut file = File::create(&p).unwrap();
+                        file.write_all(serde_json::to_string(&config).unwrap().as_bytes())
+                            .unwrap();
 
-                            let config = Self::new();
-
-                            file.write_all(serde_json::to_string(&config).unwrap().as_bytes())
-                                .unwrap();
-
-                            config
-                        }
+                        config
                     }
                 }
-                None => Self::new(),
-            },
+            }
+            None => Self::new(),
+        }
+    }
+
+    pub fn new_from_config(path: &str) -> Self {
+        match File::open(path) {
+            Ok(mut file) => {
+                let mut contents = String::new();
+
+                file.read_to_string(&mut contents).unwrap();
+
+                serde_json::from_str(contents.as_str()).unwrap()
+            }
+            Err(_) => panic!("Config file does not exist."),
         }
     }
 
@@ -118,12 +119,12 @@ impl Config {
 
             if load_from_json {
                 *config =
-                    Self::new_from_config(Some(config_updated.config_file_name.as_ref().unwrap()));
+                    Self::new_from_config(config_updated.config_file_name.as_ref().unwrap());
             }
 
             match config_updated.volume {
                 Some(_) => config.volume = config_updated.volume,
-                None => {}
+                None => {},
             }
 
             match config_updated.audio_file_name {

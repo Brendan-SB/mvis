@@ -1,6 +1,7 @@
 extern crate ncurses;
 
 mod config;
+mod fft;
 
 use config::Config;
 use rodio::{Decoder, OutputStream, Sink};
@@ -10,7 +11,7 @@ use std::io::BufReader;
 fn main() {
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
 
-    let mut config = Config::new_from_config(None);
+    let mut config = Config::new_from_base_config();
     Config::update_from_arguments(&mut config);
 
     let file = BufReader::new(File::open(config.audio_file_name.unwrap()).unwrap());
