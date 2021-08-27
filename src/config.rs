@@ -121,7 +121,7 @@ impl Config {
         }
 
         if config.audio_file_name != config_updated.audio_file_name {
-            config.audio_file_name = config_updated.volume;
+            config.audio_file_name = config_updated.audio_file_name;
         }
 
         if config.config_file_name != config_updated.config_file_name {

@@ -14,7 +14,7 @@ fn main() {
     let mut config = Config::new_from_base_config();
     Config::update_from_arguments(&mut config);
 
-    let file = BufReader::new(File::open(config.audio_file_name.unwrap()).unwrap());
+    let file = BufReader::new(File::open(config.audio_file_name).unwrap());
     let source = Decoder::new(file).unwrap();
     let sink = Sink::try_new(&stream_handle).unwrap();
 
