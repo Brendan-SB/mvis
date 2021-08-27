@@ -5,29 +5,22 @@ use std::fs;
 use std::fs::File;
 use std::io::{Read, Write};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Config {
-    pub volume: Option<f32>,
-    pub audio_file_name: Option<String>,
-    pub config_file_name: Option<String>,
+    pub volume: f32,
+    pub audio_file_name: String,
+    pub config_file_name: String,
 }
 
 impl Config {
     fn new() -> Self {
         Self {
-            volume: Some(1.0),
-            audio_file_name: Some(String::new()),
-            config_file_name: Some(String::new()),
+            volume: 1_f32,
+            audio_file_name: String::new(),
+            config_file_name: String::new(),
         }
     }
 
-    fn new_blank() -> Self {
-        Self {
-            volume: None,
-            audio_file_name: None,
-            config_file_name: None,
-        }
-    }
 
     pub fn new_from_base_config() -> Self {
         match home::home_dir() {
@@ -78,10 +71,10 @@ impl Config {
     pub fn update_from_arguments(config: &mut Config) {
         let args: Vec<String> = env::args().collect();
 
-        let load_from_json = false;
-        let mut config_updated = Self::new_blank();
+        let mut config_updated = config.clone();
 
         {
+            let load_from_json = false;
             let mut skip = false;
 
             for mut i in 0..args.len() {
@@ -91,17 +84,7 @@ impl Config {
                     continue;
                 }
 
-                if args[i] == "--config" || args[i] == "-c" {
-                    i += 1;
-
-                    if i > args.len() {
-                        break;
-                    }
-
-                    config_updated.config_file_name = Some(args[i].clone());
-
-                    skip = true;
-                } else if args[i] == "--volume" || args[i] == "-v" {
+                if args[i] == "--volume" || args[i] == "-v" {
                     i += 1;
 
                     if i > args.len() {
@@ -109,9 +92,19 @@ impl Config {
                     }
 
                     match args[i].trim().parse::<f32>() {
-                        Ok(v) => config_updated.volume = Some(v),
-                        Err(_) => panic!("Volume must be an integer."),
+                        Ok(v) => config_updated.volume = v,
+                        Err(_) => panic!("Volume must be a float."),
                     }
+
+                    skip = true;
+                } else if args[i] == "--config" || args[i] == "-c" {
+                    i += 1;
+
+                    if i > args.len() {
+                        break;
+                    }
+
+                    config_updated.config_file_name = args[i].clone();
 
                     skip = true;
                 }
@@ -119,23 +112,20 @@ impl Config {
 
             if load_from_json {
                 *config =
-                    Self::new_from_config(config_updated.config_file_name.as_ref().unwrap());
+                    Self::new_from_config(config_updated.config_file_name.as_str());
             }
+        }
 
-            match config_updated.volume {
-                Some(_) => config.volume = config_updated.volume,
-                None => {},
-            }
+        if config.volume != config_updated.volume {
+            config.volume = config_updated.volume;
+        }
 
-            match config_updated.audio_file_name {
-                Some(_) => config.audio_file_name = config_updated.audio_file_name.clone(),
-                None => {},
-            }
+        if config.audio_file_name != config_updated.audio_file_name {
+            config.audio_file_name = config_updated.volume;
+        }
 
-            match config_updated.config_file_name {
-                Some(_) => config.config_file_name = config_updated.config_file_name.clone(),
-                None => {},
-            }
+        if config.config_file_name != config_updated.config_file_name {
+            config.config_file_name = config_updated.config_file_name;
         }
     }
 }
