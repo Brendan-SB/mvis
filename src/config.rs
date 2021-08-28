@@ -5,8 +5,19 @@ use std::fs;
 use std::fs::File;
 use std::io::{Read, Write};
 
+use args::{Args, ArgsError};
+use getopts::Occur;
+
+use std::path::PathBuf;
+
+use home::home_dir;
+
+const PROGRAM_NAME: &'static str = "mvis";
+const PROGRAM_DESC: &'static str = "A command line music visualizer.";
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Config {
+    pub help: bool,
     pub volume: f32,
     pub audio_file_name: String,
     pub config_file_name: String,
@@ -15,6 +26,7 @@ pub struct Config {
 impl Config {
     fn new() -> Self {
         Self {
+            help: false,
             volume: 1_f32,
             audio_file_name: String::new(),
             config_file_name: String::new(),
@@ -67,55 +79,52 @@ impl Config {
         }
     }
 
-    pub fn update_from_arguments(config: &mut Config) {
-        let args: Vec<String> = env::args().collect();
+    pub fn update_from_arguments(config: &mut Config) -> Result<(), ArgsError> {
+        let mut args = Args::new(PROGRAM_NAME, PROGRAM_DESC);
 
-        let mut config_updated = config.clone();
+        args.flag("h", "help", "Print the usage menu.");
+        args.option(
+            "v",
+            "volume",
+            "Sets the volume.",
+            "VOLUME",
+            Occur::Req,
+            Some(String::from("1.0")),
+        );
+        args.option(
+            "c",
+            "config",
+            "The path to the config file. Default: ~/.config/mvis/config.json.",
+            "CONFIG",
+            Occur::Req,
+            None,
+        );
+        args.option(
+            "f",
+            "file",
+            "The path to the audio file.",
+            "FILE",
+            Occur::Optional,
+            Some(
+                [
+                    home_dir().unwrap(),
+                    PathBuf::from(".config"),
+                    PathBuf::from("mvis"),
+                    PathBuf::from("config.json"),
+                ]
+                .iter()
+                .collect::<PathBuf>()
+                .into_os_string()
+                .into_string()
+                .unwrap(),
+            ),
+        );
 
-        {
-            let load_from_json = false;
-            let mut skip = false;
+        args.parse(env::args()).unwrap();
 
-            for mut i in 0..args.len() {
-                if skip {
-                    skip = false;
+        config.help = args.value_of("help").unwrap();
+        config.volume = args.value_of("volume").unwrap();
 
-                    continue;
-                }
-
-                if args[i] == "--volume" || args[i] == "-v" {
-                    i += 1;
-
-                    if i > args.len() {
-                        break;
-                    }
-
-                    match args[i].trim().parse::<f32>() {
-                        Ok(v) => config_updated.volume = v,
-                        Err(_) => panic!("Volume must be a float."),
-                    }
-
-                    skip = true;
-                } else if args[i] == "--config" || args[i] == "-c" {
-                    i += 1;
-
-                    if i > args.len() {
-                        break;
-                    }
-
-                    config_updated.config_file_name = args[i].clone();
-
-                    skip = true;
-                }
-            }
-
-            if load_from_json {
-                *config = Self::new_from_config(config_updated.config_file_name.as_str());
-            }
-        }
-
-        config.volume = config_updated.volume;
-        config.audio_file_name = config_updated.audio_file_name;
-        config.config_file_name = config_updated.config_file_name;
+        Ok(())
     }
 }

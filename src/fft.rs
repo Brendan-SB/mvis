@@ -9,7 +9,7 @@ fn fft(x: &Array1<f32>) {
         "Value must be a power of 2."
     );
 
-    let x_arranged_arranged = Array::range(0_f32, 1_f32, f32::min(x_size, 2_f32));
+    let x_arranged = Array::range(0_f32, 1_f32, f32::min(x_size, 2_f32));
 
     let k = x.slice(s![.., NewAxis]);
 

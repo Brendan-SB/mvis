@@ -1,3 +1,4 @@
+extern crate args;
 extern crate ncurses;
 
 mod config;
