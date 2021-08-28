@@ -12,5 +12,4 @@ pub fn fft(x: &Array1<f32>) {
     let x_arranged = Array::range(0_f32, 1_f32, f32::min(x_size, 2_f32));
 
     let k = x.slice(s![.., NewAxis]);
-    println!("{}", k);
 }
