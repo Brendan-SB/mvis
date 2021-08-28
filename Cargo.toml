@@ -2,15 +2,15 @@
 name = "mvis"
 version = "0.1.0"
 edition = "2018"
-
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ndarray = "0.15.3"
-home = "0.5.3"
-ncurses = "5.101.0"
-rodio = "0.14.0"
-serde_json = "1.0.66"
-serde = { version = "1.0.127", features = ["derive"] }
 args = "2.2.0"
 getopts = "0.2.21"
+home = "0.5.3"
+ncurses = "5.101.0"
+ndarray = "0.15.3"
+ndarray-rand = "0.14.0" # REMOVE THIS AFTER TESTING
+rodio = "0.14.0"
+serde = { version = "1.0.127", features = ["derive"] }
+serde_json = "1.0.66"

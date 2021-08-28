@@ -1,6 +1,6 @@
 use ndarray::{s, Array, Array1, NewAxis};
 
-fn fft(x: &Array1<f32>) {
+pub fn fft(x: &Array1<f32>) {
     let x_size = x.len() as f32;
 
     assert_eq!(
@@ -12,4 +12,5 @@ fn fft(x: &Array1<f32>) {
     let x_arranged = Array::range(0_f32, 1_f32, f32::min(x_size, 2_f32));
 
     let k = x.slice(s![.., NewAxis]);
+    println!("{}", k);
 }
