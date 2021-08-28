@@ -1,9 +1,8 @@
 use serde::{Deserialize, Serialize};
 
 use std::env;
-use std::fs;
 use std::fs::File;
-use std::io::{Read, Write};
+use std::io::Read;
 
 use args::{Args, ArgsError};
 use getopts::Occur;
@@ -24,12 +23,25 @@ pub struct Config {
 }
 
 impl Config {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             help: false,
             volume: 1_f32,
             audio_file_path: String::new(),
             config_file_path: String::new(),
+        }
+    }
+
+    pub fn new_from_config(path: &String) -> Self {
+        match File::open(path) {
+            Ok(mut file) => {
+                let mut contents = String::new();
+
+                file.read_to_string(&mut contents).unwrap();
+
+                serde_json::from_str(contents.as_str()).unwrap()
+            }
+            Err(_) => panic!("Config file does not exist."),
         }
     }
 
@@ -76,10 +88,13 @@ impl Config {
 
         args.parse(env::args()).unwrap();
 
+        config.config_file_path = args.value_of("config").unwrap();
+
+        *config = Self::new_from_config(&config.config_file_path);
+
         config.help = args.value_of("help").unwrap();
         config.volume = args.value_of("volume").unwrap();
         config.audio_file_path = args.value_of("file").unwrap();
-        config.config_file_path = args.value_of("config").unwrap();
 
         Ok(())
     }
