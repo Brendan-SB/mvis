@@ -21,7 +21,6 @@ impl Config {
         }
     }
 
-
     pub fn new_from_base_config() -> Self {
         match home::home_dir() {
             Some(mut p) => {
@@ -111,21 +110,12 @@ impl Config {
             }
 
             if load_from_json {
-                *config =
-                    Self::new_from_config(config_updated.config_file_name.as_str());
+                *config = Self::new_from_config(config_updated.config_file_name.as_str());
             }
         }
 
-        if config.volume != config_updated.volume {
-            config.volume = config_updated.volume;
-        }
-
-        if config.audio_file_name != config_updated.audio_file_name {
-            config.audio_file_name = config_updated.audio_file_name;
-        }
-
-        if config.config_file_name != config_updated.config_file_name {
-            config.config_file_name = config_updated.config_file_name;
-        }
+        config.volume = config_updated.volume;
+        config.audio_file_name = config_updated.audio_file_name;
+        config.config_file_name = config_updated.config_file_name;
     }
 }
