@@ -49,7 +49,7 @@ impl Config {
     }
 
     pub fn update_from_arguments(
-        &self,
+        &mut self,
         args: &mut Args,
         help: &mut bool,
     ) -> Result<(), ArgsError> {
@@ -92,7 +92,7 @@ impl Config {
         {
             let gte_0 = Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 0_f32));
             let lte_1 = Box::new(OrderValidation::new(Order::LessThanOrEqual, 1_f32));
-            config.volume = args.validated_value_of("volume", &[gte_0, lte_1]).unwrap();
+            self.volume = args.validated_value_of("volume", &[gte_0, lte_1]).unwrap();
         }
 
         self.audio_file_path = args.value_of("file").unwrap();
