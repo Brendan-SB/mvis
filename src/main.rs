@@ -25,14 +25,12 @@ fn main() {
     config.update_from_arguments(&mut args, &mut help).unwrap();
 
     if help {
-        print!("{}", args.full_usage());
+        println!("{}", args.full_usage());
 
         return;
     }
 
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
-
-    println!("{}", config.audio_file_path);
 
     let file = BufReader::new(File::open(config.audio_file_path).unwrap());
     let source = Decoder::new(file).unwrap();

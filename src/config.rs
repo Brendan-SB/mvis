@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use std::env;
-use std::fs::File;
+use std::fs::{File, create_dir_all};
 use std::io::{Read, Write};
 
 use args::validations::{Order, OrderValidation};
@@ -18,10 +18,12 @@ pub struct Config {
 
 impl Config {
     pub fn try_create_default_config() {
-        let path = home_dir().unwrap().join(".config/mvis/config.json");
+        let directory_path = home_dir().unwrap().join(".config/mvis");
+        let file_path = directory_path.join("config.json");
 
-        if !path.exists() {
-            File::create(path)
+        if !file_path.exists() {
+            create_dir_all(directory_path).unwrap();
+            File::create(file_path)
                 .unwrap()
                 .write_all(&serde_json::to_string(&Self::new()).unwrap().as_bytes())
                 .unwrap();
@@ -96,8 +98,6 @@ impl Config {
         }
 
         self.audio_file_path = args.value_of("file").unwrap();
-
-        println!("Value: {}", self.audio_file_path);
 
         Ok(())
     }
