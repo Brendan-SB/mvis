@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use std::env;
-use std::fs::{File, create_dir_all};
+use std::fs::{create_dir_all, File};
 use std::io::{Read, Write};
 
 use args::validations::{Order, OrderValidation};
@@ -9,6 +9,9 @@ use args::{Args, ArgsError};
 use getopts::Occur;
 
 use home::home_dir;
+
+const PROGRAM_NAME: &'static str = "mvis";
+const PROGRAM_DESC: &'static str = "A command line music visualizer.";
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Config {
@@ -30,31 +33,9 @@ impl Config {
         }
     }
 
-    pub fn new() -> Self {
-        Self {
-            volume: 1_f32,
-            audio_file_path: String::new(),
-        }
-    }
+    pub fn new_args() -> Args {
+        let mut args = Args::new(PROGRAM_NAME, PROGRAM_DESC);
 
-    pub fn new_from_config(path: String) -> Self {
-        match File::open(path) {
-            Ok(mut file) => {
-                let mut contents = String::new();
-
-                file.read_to_string(&mut contents).unwrap();
-
-                serde_json::from_str(contents.as_str()).unwrap()
-            }
-            Err(_) => panic!("Config file does not exist."),
-        }
-    }
-
-    pub fn update_from_arguments(
-        &mut self,
-        args: &mut Args,
-        help: &mut bool,
-    ) -> Result<(), ArgsError> {
         args.flag("h", "help", "Print the usage menu.");
         args.option(
             "v",
@@ -89,13 +70,42 @@ impl Config {
         );
 
         args.parse(env::args()).unwrap();
+
+        args
+    }
+
+    pub fn new() -> Self {
+        Self {
+            volume: 1_f32,
+            audio_file_path: String::new(),
+        }
+    }
+
+    pub fn new_from_config(path: String) -> Self {
+        match File::open(path) {
+            Ok(mut file) => {
+                let mut contents = String::new();
+
+                file.read_to_string(&mut contents).unwrap();
+
+                serde_json::from_str(contents.as_str()).unwrap()
+            }
+            Err(_) => panic!("Config file does not exist."),
+        }
+    }
+
+    pub fn update_from_arguments(&mut self, args: &mut Args) -> Result<(), ArgsError> {
         *self = Self::new_from_config(args.value_of("config").unwrap());
 
-        {
-            let gte_0 = Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 0_f32));
-            let lte_1 = Box::new(OrderValidation::new(Order::LessThanOrEqual, 1_f32));
-            self.volume = args.validated_value_of("volume", &[gte_0, lte_1]).unwrap();
-        }
+        self.volume = args
+            .validated_value_of(
+                "volume",
+                &[
+                    Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 0_f32)),
+                    Box::new(OrderValidation::new(Order::LessThanOrEqual, 1_f32)),
+                ],
+            )
+            .unwrap();
 
         self.audio_file_path = args.value_of("file").unwrap();
 
