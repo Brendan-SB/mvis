@@ -33,7 +33,7 @@ impl Config {
         }
     }
 
-    pub fn new_args() -> Args {
+    pub fn create_args() -> Args {
         let mut args = Args::new(PROGRAM_NAME, PROGRAM_DESC);
 
         args.flag("h", "help", "Print the usage menu.");

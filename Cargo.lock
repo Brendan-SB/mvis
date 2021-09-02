@@ -482,6 +482,7 @@ dependencies = [
  "ncurses",
  "ndarray",
  "ndarray-rand",
+ "num-complex",
  "rodio",
  "serde",
  "serde_json",
