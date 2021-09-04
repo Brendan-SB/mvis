@@ -6,9 +6,9 @@ mod consts;
 mod fft;
 
 use config::Config;
-use rodio::{Decoder, OutputStream, Sink};
+use rodio::{Decoder, OutputStream, source::Source};
 use std::fs::File;
-use std::io::{Read, Cursor};
+use std::io::BufReader;
 
 fn main() {
     let mut args = Config::new_args();
@@ -20,17 +20,11 @@ fn main() {
     }
 
     let config = Config::new_from_arguments(&mut args);
+    
+    let file = BufReader::new(File::open(config.audio_file_path).unwrap());
 
-    let mut file = File::open(config.audio_file_path).unwrap();
-    let mut buf = Vec::new();
-    file.read_to_end(&mut buf).unwrap();
-
-    let source = Decoder::new(Cursor::new(buf.clone())).unwrap();
+    let source = Decoder::new(file).unwrap();
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
-    let sink = Sink::try_new(&stream_handle).unwrap();
 
-    sink.set_volume(config.volume);
-
-    sink.append(source);
-    sink.sleep_until_end();
+    stream_handle.play_raw(source.convert_samples()).unwrap();
 }

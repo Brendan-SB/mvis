@@ -10,7 +10,7 @@ use std::io::{Read, Write};
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Config {
-    pub volume: f32,
+    pub volume: f64,
     pub audio_file_path: String,
 }
 
@@ -58,7 +58,7 @@ impl Config {
 
     pub fn new() -> Self {
         Self {
-            volume: 1_f32,
+            volume: 1_f64,
             audio_file_path: String::new(),
         }
     }
@@ -98,8 +98,8 @@ impl Config {
             .validated_value_of(
                 "volume",
                 &[
-                    Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 0_f32)),
-                    Box::new(OrderValidation::new(Order::LessThanOrEqual, 1_f32)),
+                    Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 0_f64)),
+                    Box::new(OrderValidation::new(Order::LessThanOrEqual, 1_f64)),
                 ],
             )
             .unwrap();
