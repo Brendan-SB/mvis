@@ -8,9 +8,8 @@ edition = "2018"
 args = "2.2.0"
 getopts = "0.2.21"
 home = "0.5.3"
+lazy_static = "1.4.0"
 ncurses = "5.101.0"
-ndarray = "0.15.3"
-ndarray-rand = "0.14.0" # REMOVE THIS AFTER TESTING
 num-complex = "0.4.0"
 rodio = "0.14.0"
 serde = { version = "1.0.127", features = ["derive"] }

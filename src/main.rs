@@ -1,4 +1,5 @@
 extern crate args;
+extern crate lazy_static;
 extern crate ncurses;
 
 mod config;
