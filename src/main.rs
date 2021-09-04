@@ -12,7 +12,6 @@ use std::io::BufReader;
 fn main() {
     Config::try_create_default_config();
 
-    let mut config = Config::new();
     let mut args = Config::create_args();
 
     if args.value_of("help").unwrap() {
@@ -21,7 +20,7 @@ fn main() {
         return;
     }
 
-    config.update_from_arguments(&mut args).unwrap();
+    let config = Config::new_from_arguments(&mut args);
 
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
 

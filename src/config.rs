@@ -94,10 +94,10 @@ impl Config {
         }
     }
 
-    pub fn update_from_arguments(&mut self, args: &mut Args) -> Result<(), ArgsError> {
-        *self = Self::new_from_config(args.value_of("config").unwrap());
+    pub fn new_from_arguments(args: &mut Args) -> Self {
+        let mut config = Self::new_from_config(args.value_of("config").unwrap());
 
-        self.volume = args
+        config.volume = args
             .validated_value_of(
                 "volume",
                 &[
@@ -107,8 +107,8 @@ impl Config {
             )
             .unwrap();
 
-        self.audio_file_path = args.value_of("file").unwrap();
+        config.audio_file_path = args.value_of("file").unwrap();
 
-        Ok(())
+        config
     }
 }
