@@ -12,7 +12,7 @@ use std::io::BufReader;
 fn main() {
     Config::try_create_default_config();
 
-    let mut args = Config::create_args();
+    let mut args = Config::new_args();
 
     if args.value_of("help").unwrap() {
         println!("{}", args.full_usage());

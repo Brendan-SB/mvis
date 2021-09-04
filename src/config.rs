@@ -5,7 +5,7 @@ use std::fs::{create_dir_all, File};
 use std::io::{Read, Write};
 
 use args::validations::{Order, OrderValidation};
-use args::{Args, ArgsError};
+use args::Args;
 use getopts::Occur;
 
 use home::home_dir;
@@ -33,7 +33,7 @@ impl Config {
         }
     }
 
-    pub fn create_args() -> Args {
+    pub fn new_args() -> Args {
         let mut args = Args::new(PROGRAM_NAME, PROGRAM_DESC);
 
         args.flag("h", "help", "Print the usage menu.");
