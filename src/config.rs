@@ -1,17 +1,12 @@
-use serde::{Deserialize, Serialize};
-
-use std::env;
-use std::fs::{create_dir_all, File};
-use std::io::{Read, Write};
-
+use crate::consts::{PROGRAM_DESC, PROGRAM_NAME};
 use args::validations::{Order, OrderValidation};
 use args::Args;
 use getopts::Occur;
-
 use home::home_dir;
-
-const PROGRAM_NAME: &str = "mvis";
-const PROGRAM_DESC: &str = "A command line music visualizer.";
+use serde::{Deserialize, Serialize};
+use std::env;
+use std::fs::{create_dir_all, File};
+use std::io::{Read, Write};
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Config {
@@ -29,7 +24,7 @@ impl Config {
             "volume",
             "Sets the volume.",
             "VOLUME",
-            Occur::Req,
+            Occur::Optional,
             Some(String::from("1.0")),
         );
         args.option(
