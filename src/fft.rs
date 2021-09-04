@@ -14,5 +14,6 @@ pub fn fft(x: Array1<f32>) {
 
     let k = x.slice(s![.., NewAxis]);
 
-    let exp = Complex::new(0_f32, -2_f32) * PI * Array1::from_vec(n) * k / Complex::new(min as f32, 0_f32);
+    let exp = Complex::new(0_f32, -2_f32) * PI * Array1::from_vec(n) * k
+        / Complex::new(min as f32, 0_f32);
 }
