@@ -453,7 +453,6 @@ dependencies = [
  "args",
  "getopts",
  "home",
- "lazy_static",
  "ncurses",
  "num-complex",
  "rodio",
