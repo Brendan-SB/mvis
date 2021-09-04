@@ -20,19 +20,6 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn try_create_default_config() {
-        let directory_path = home_dir().unwrap().join(".config/mvis");
-        let file_path = directory_path.join("config.json");
-
-        if !file_path.exists() {
-            create_dir_all(directory_path).unwrap();
-            File::create(file_path)
-                .unwrap()
-                .write_all(&serde_json::to_string(&Self::new()).unwrap().as_bytes())
-                .unwrap();
-        }
-    }
-
     pub fn new_args() -> Args {
         let mut args = Args::new(PROGRAM_NAME, PROGRAM_DESC);
 
@@ -95,7 +82,22 @@ impl Config {
     }
 
     pub fn new_from_arguments(args: &mut Args) -> Self {
-        let mut config = Self::new_from_config(args.value_of("config").unwrap());
+        let mut config = Self::new();
+
+        {
+            let directory_path = home_dir().unwrap().join(".config/mvis");
+            let file_path = directory_path.join("config.json");
+
+            if file_path.exists() {
+                config = Self::new_from_config(args.value_of("config").unwrap())
+            } else {
+                create_dir_all(directory_path).unwrap();
+                File::create(file_path)
+                    .unwrap()
+                    .write_all(&serde_json::to_string(&Self::new()).unwrap().as_bytes())
+                    .unwrap();
+            }
+        }
 
         config.volume = args
             .validated_value_of(

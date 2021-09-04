@@ -7,10 +7,10 @@ mod fft;
 use config::Config;
 use rodio::{Decoder, OutputStream, Sink};
 use std::fs::File;
-use std::io::BufReader;
+use std::io::{Cursor, Read};
 
 fn main() {
-    Config::try_create_default_config();
+    println!("Loading args...");
 
     let mut args = Config::new_args();
 
@@ -20,15 +20,27 @@ fn main() {
         return;
     }
 
+    println!("Loading config...");
+
     let config = Config::new_from_arguments(&mut args);
 
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
 
-    let file = BufReader::new(File::open(config.audio_file_path).unwrap());
-    let source = Decoder::new(file).unwrap();
+    println!("Loading audio file...");
+
+    let mut file = File::open(config.audio_file_path).unwrap();
+    let mut buf = Vec::new();
+    file.read_to_end(&mut buf).unwrap();
+
+    let source = Decoder::new(Cursor::new(buf.clone())).unwrap();
     let sink = Sink::try_new(&stream_handle).unwrap();
 
-    sink.append(source);
+    println!("Configuring sink...");
 
+    sink.set_volume(config.volume);
+
+    println!("Playing audio...");
+
+    sink.append(source);
     sink.sleep_until_end();
 }
