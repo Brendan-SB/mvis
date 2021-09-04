@@ -27,11 +27,13 @@ pub fn fft(mut input: Vec<Complex<f64>>) -> Vec<Complex<f64>> {
         }
     }
 
-
-    input.append(&mut vec![Complex {
-        re: 0_f64,
-        im: 0_f64,
-    }; input.len().next_power_of_two() - input.len()]);
+    input.append(&mut vec![
+        Complex {
+            re: 0_f64,
+            im: 0_f64,
+        };
+        input.len().next_power_of_two() - input.len()
+    ]);
 
     input
 }

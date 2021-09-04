@@ -10,8 +10,8 @@ use getopts::Occur;
 
 use home::home_dir;
 
-const PROGRAM_NAME: &'static str = "mvis";
-const PROGRAM_DESC: &'static str = "A command line music visualizer.";
+const PROGRAM_NAME: &str = "mvis";
+const PROGRAM_DESC: &str = "A command line music visualizer.";
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Config {
