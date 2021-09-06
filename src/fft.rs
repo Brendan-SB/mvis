@@ -1,10 +1,10 @@
 use num_complex::Complex;
 use std::f64::consts::PI;
 
-pub fn fft(input: Vec<Complex<f64>>) -> Vec<Complex<f64>> {
+pub fn fft(mut input: Vec<Complex<f64>>) -> Vec<Complex<f64>> {
     fn fft_inner(buf_a: &mut [Complex<f64>], buf_b: &mut [Complex<f64>], n: usize, step: usize) {
         const I: Complex<f64> = Complex { re: 0.0, im: 1.0 };
-
+    
         if step >= n {
             return;
         }
@@ -23,9 +23,8 @@ pub fn fft(input: Vec<Complex<f64>>) -> Vec<Complex<f64>> {
 
     let n_orig = input.len();
     let n = n_orig.next_power_of_two();
-    let mut buf_a = input.clone();
 
-    buf_a.append(&mut vec![
+    input.append(&mut vec![
         Complex {
             re: 0_f64,
             im: 0_f64
@@ -33,9 +32,9 @@ pub fn fft(input: Vec<Complex<f64>>) -> Vec<Complex<f64>> {
         n - n_orig
     ]);
 
-    let mut buf_b = buf_a.clone();
+    let mut buf_b = input.clone();
 
-    fft_inner(&mut buf_a, &mut buf_b, n, 1);
+    fft_inner(&mut input, &mut buf_b, n, 1);
 
-    buf_a
+    input
 }
