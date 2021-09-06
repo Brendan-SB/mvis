@@ -3,6 +3,7 @@ use args::validations::{Order, OrderValidation};
 use args::Args;
 use getopts::Occur;
 use home::home_dir;
+use kira::{instance::InstanceSettings, Value};
 use serde::{Deserialize, Serialize};
 use std::env;
 use std::fs::{create_dir_all, File};
@@ -10,12 +11,26 @@ use std::io::{Read, Write};
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Config {
-    pub volume: f32,
     pub audio_file_path: String,
+    pub volume: f64,
 }
 
 impl Config {
-    pub fn new_args() -> Args {
+    pub fn try_create_default_config() {
+        let directory_path = home_dir().unwrap().join(".config/mvis");
+        let file_path = directory_path.join("config.json");
+
+        if !file_path.exists() {
+            create_dir_all(directory_path).unwrap();
+
+            File::create(file_path)
+                .unwrap()
+                .write_all(&serde_json::to_string(&Self::new()).unwrap().as_bytes())
+                .unwrap();
+        }
+    }
+
+    pub fn create_args() -> Args {
         let mut args = Args::new(PROGRAM_NAME, PROGRAM_DESC);
 
         args.flag("h", "help", "Print the usage menu.");
@@ -56,14 +71,14 @@ impl Config {
         args
     }
 
-    pub fn new() -> Self {
+    fn new() -> Self {
         Self {
-            volume: 1_f32,
             audio_file_path: String::new(),
+            volume: 1_f64,
         }
     }
 
-    pub fn new_from_config(path: String) -> Self {
+    fn new_from_config(path: String) -> Self {
         match File::open(path) {
             Ok(mut file) => {
                 let mut contents = String::new();
@@ -77,29 +92,14 @@ impl Config {
     }
 
     pub fn new_from_arguments(args: &Args) -> Self {
-        let mut config = Self::new();
-
-        {
-            let directory_path = home_dir().unwrap().join(".config/mvis");
-            let file_path = directory_path.join("config.json");
-
-            if file_path.exists() {
-                config = Self::new_from_config(args.value_of("config").unwrap())
-            } else {
-                create_dir_all(directory_path).unwrap();
-                File::create(file_path)
-                    .unwrap()
-                    .write_all(&serde_json::to_string(&Self::new()).unwrap().as_bytes())
-                    .unwrap();
-            }
-        }
+        let mut config = Self::new_from_config(args.value_of("config").unwrap());
 
         config.volume = args
             .validated_value_of(
                 "volume",
                 &[
-                    Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 0_f32)),
-                    Box::new(OrderValidation::new(Order::LessThanOrEqual, 1_f32)),
+                    Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 0_f64)),
+                    Box::new(OrderValidation::new(Order::LessThanOrEqual, 1_f64)),
                 ],
             )
             .unwrap();
@@ -107,5 +107,13 @@ impl Config {
         config.audio_file_path = args.value_of("file").unwrap();
 
         config
+    }
+
+    pub fn create_instance_settings(&self) -> InstanceSettings {
+        let mut instance_settings = InstanceSettings::default();
+
+        instance_settings.volume = Value::from(self.volume);
+
+        instance_settings
     }
 }

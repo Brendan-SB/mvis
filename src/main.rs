@@ -6,12 +6,15 @@ mod consts;
 mod fft;
 
 use config::Config;
-use rodio::{Decoder, OutputStream, Sink};
-use std::fs::File;
-use std::io::BufReader;
+use kira::{
+    manager::{AudioManager, AudioManagerSettings},
+    sound::SoundSettings,
+};
 
 fn main() {
-    let args = Config::new_args();
+    Config::try_create_default_config();
+
+    let args = Config::create_args();
 
     if args.value_of("help").unwrap() {
         println!("{}", args.full_usage());
@@ -21,14 +24,12 @@ fn main() {
 
     let config = Config::new_from_arguments(&args);
 
-    let file = BufReader::new(File::open(config.audio_file_path).unwrap());
-    let source = Decoder::new(file).unwrap();
+    let mut audio_manager = AudioManager::new(AudioManagerSettings::default()).unwrap();
 
-    let (_stream, stream_handle) = OutputStream::try_default().unwrap();
-    let sink = Sink::try_new(&stream_handle).unwrap();
+    let mut sound_handle =
+        audio_manager.load_sound(&config.audio_file_path, SoundSettings::default()).unwrap();
 
-    sink.set_volume(config.volume);
+    sound_handle.play(config.create_instance_settings()).unwrap();
 
-    sink.append(source);
-    sink.sleep_until_end();
+    std::thread::sleep(std::time::Duration::from_secs_f64(sound_handle.duration()));
 }
