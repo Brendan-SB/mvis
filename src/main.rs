@@ -34,7 +34,7 @@ fn main() {
 
     println!("Playing audio...");
 
-    let clip = sound_handle
+    sound_handle
         .play(config.create_instance_settings())
         .unwrap();
 
