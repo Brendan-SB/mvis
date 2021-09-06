@@ -7,7 +7,6 @@ mod fft;
 
 use config::Config;
 use kira::{
-    arrangement::SoundClip,
     manager::{AudioManager, AudioManagerSettings},
     sound::SoundSettings,
 };
