@@ -11,8 +11,7 @@ use kira::{
     manager::{AudioManager, AudioManagerSettings},
     sound::SoundSettings,
 };
-use std::thread::sleep;
-use std::time::Duration;
+use std::{thread::sleep, time::Duration};
 
 fn main() {
     Config::try_create_default_config();
