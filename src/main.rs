@@ -10,6 +10,8 @@ use kira::{
     manager::{AudioManager, AudioManagerSettings},
     sound::SoundSettings,
 };
+use std::thread::sleep;
+use std::time::Duration;
 
 fn main() {
     Config::try_create_default_config();
@@ -26,10 +28,13 @@ fn main() {
 
     let mut audio_manager = AudioManager::new(AudioManagerSettings::default()).unwrap();
 
-    let mut sound_handle =
-        audio_manager.load_sound(&config.audio_file_path, SoundSettings::default()).unwrap();
+    let mut sound_handle = audio_manager
+        .load_sound(&config.audio_file_path, SoundSettings::default())
+        .unwrap();
 
-    sound_handle.play(config.create_instance_settings()).unwrap();
+    sound_handle
+        .play(config.create_instance_settings())
+        .unwrap();
 
-    std::thread::sleep(std::time::Duration::from_secs_f64(sound_handle.duration()));
+    sleep(Duration::from_secs_f64(sound_handle.duration()));
 }
