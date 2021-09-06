@@ -5,9 +5,11 @@ use getopts::Occur;
 use home::home_dir;
 use kira::{instance::InstanceSettings, Value};
 use serde::{Deserialize, Serialize};
-use std::env;
-use std::fs::{create_dir_all, File};
-use std::io::{Read, Write};
+use std::{
+    env,
+    fs::{create_dir_all, File},
+    io::{Read, Write},
+};
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Config {
