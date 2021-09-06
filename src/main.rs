@@ -1,12 +1,10 @@
-extern crate args;
-extern crate ncurses;
-
 mod config;
 mod consts;
 mod fft;
 
 use config::Config;
 use kira::{
+    arrangement::{Arrangement, ArrangementSettings, SoundClip},
     manager::{AudioManager, AudioManagerSettings},
     sound::SoundSettings,
 };
@@ -25,18 +23,13 @@ fn main() {
 
     let config = Config::new_from_arguments(&args);
 
-    println!("Loading sound...");
-
     let mut audio_manager = AudioManager::new(AudioManagerSettings::default()).unwrap();
-    let mut sound_handle = audio_manager
+    let sound_handle = audio_manager
         .load_sound(&config.audio_file_path, SoundSettings::default())
         .unwrap();
-
-    println!("Playing audio...");
-
-    sound_handle
-        .play(config.create_instance_settings())
-        .unwrap();
-
+    let mut arrangement = Arrangement::new(ArrangementSettings::new());
+    
+    arrangement.add_clip(SoundClip::new(&sound_handle, 0_f64).trim(20_f64));
+    
     sleep(Duration::from_secs_f64(sound_handle.duration()));
 }

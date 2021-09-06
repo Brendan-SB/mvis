@@ -1,6 +1,8 @@
 use crate::consts::{PROGRAM_DESC, PROGRAM_NAME};
-use args::validations::{Order, OrderValidation};
-use args::Args;
+use args::{
+    validations::{Order, OrderValidation},
+    Args,
+};
 use getopts::Occur;
 use home::home_dir;
 use kira::{instance::InstanceSettings, Value};
@@ -105,7 +107,6 @@ impl Config {
                 ],
             )
             .unwrap();
-
         config.audio_file_path = args.value_of("file").unwrap();
 
         config
