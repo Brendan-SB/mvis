@@ -28,12 +28,15 @@ fn main() {
         .load_sound(&config.audio_file_path, SoundSettings::default())
         .unwrap();
 
-    let mut arrangement = Arrangement::new(ArrangementSettings::default());
-
-    arrangement.add_clip(SoundClip::new(&sound_handle, 0_f64).trim(20_f64));
 
     let arrangement_handle = audio_manager.add_arrangement(
-        arrangement
+        {
+            let mut arrangement = Arrangement::new(ArrangementSettings::default());
+
+            arrangement.add_clip(SoundClip::new(&sound_handle, 0_f64).trim(20_f64));
+
+            arrangement
+        }
     );
 
     sleep(Duration::from_secs_f64(sound_handle.duration()));
