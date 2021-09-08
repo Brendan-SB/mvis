@@ -4,11 +4,13 @@ mod fft;
 
 use config::Config;
 use kira::{
-    arrangement::{Arrangement, ArrangementSettings, SoundClip},
     manager::{AudioManager, AudioManagerSettings},
-    sound::SoundSettings,
+    sound::{SoundSettings, Sound},
 };
-use std::{cell::RefCell, thread::sleep, time::Duration};
+use std::{
+    thread::sleep,
+    time::{Duration, SystemTime},
+};
 
 fn main() {
     Config::try_create_default_config();
@@ -23,21 +25,35 @@ fn main() {
 
     let config = Config::new_from_arguments(&args);
 
+    println!("Loading audio...");
+
+    let sound = Sound::from_file(&config.audio_file_path, SoundSettings::default()).unwrap();
     let mut audio_manager = AudioManager::new(AudioManagerSettings::default()).unwrap();
     let sound_handle = audio_manager
-        .load_sound(&config.audio_file_path, SoundSettings::default())
+        .add_sound(sound.clone())
         .unwrap();
+    
+    let sound_handle_duration = sound_handle.duration();
 
+    assert!(sound_handle_duration >= 0.02_f64, "Your sound file is too short.");
 
-    let arrangement_handle = audio_manager.add_arrangement(
-        {
-            let mut arrangement = Arrangement::new(ArrangementSettings::default());
+    let now = SystemTime::now();
 
-            arrangement.add_clip(SoundClip::new(&sound_handle, 0_f64).trim(20_f64));
+    println!("Playing audio...");
 
-            arrangement
+    {
+        let mut i_prev = 0_f64;
+        let mut i = 0.02_f64;
+
+        while i < sound_handle_duration {
+            i_prev = i;
+            i += 0.02_f64;
         }
-    );
+    }
 
-    sleep(Duration::from_secs_f64(sound_handle.duration()));
+    let duration_remaining = sound_handle_duration - now.elapsed().unwrap().as_secs_f64();
+
+    if duration_remaining > 0_f64 {
+        sleep(Duration::from_secs_f64(duration_remaining));
+    }
 }
