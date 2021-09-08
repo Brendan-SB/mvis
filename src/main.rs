@@ -5,7 +5,7 @@ mod fft;
 use config::Config;
 use kira::{
     manager::{AudioManager, AudioManagerSettings},
-    sound::{SoundSettings, Sound},
+    sound::{Sound, SoundSettings},
 };
 use std::{
     thread::sleep,
@@ -29,13 +29,14 @@ fn main() {
 
     let sound = Sound::from_file(&config.audio_file_path, SoundSettings::default()).unwrap();
     let mut audio_manager = AudioManager::new(AudioManagerSettings::default()).unwrap();
-    let sound_handle = audio_manager
-        .add_sound(sound.clone())
-        .unwrap();
-    
+    let sound_handle = audio_manager.add_sound(sound.clone()).unwrap();
+
     let sound_handle_duration = sound_handle.duration();
 
-    assert!(sound_handle_duration >= 0.02_f64, "Your sound file is too short.");
+    assert!(
+        sound_handle_duration >= 0.02_f64,
+        "Your sound file is too short."
+    );
 
     let now = SystemTime::now();
 
