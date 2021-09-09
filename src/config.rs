@@ -5,7 +5,6 @@ use args::{
 };
 use getopts::Occur;
 use home::home_dir;
-use kira::{instance::InstanceSettings, Value};
 use serde::{Deserialize, Serialize};
 use std::{
     env,
@@ -69,6 +68,14 @@ impl Config {
                     .unwrap(),
             ),
         );
+        args.option(
+            "t",
+            "type",
+            "Override of the type of file you want to play.",
+            "TYPE",
+            Occur::Optional,
+            None,
+        );
 
         args.parse(env::args()).unwrap();
 
@@ -110,13 +117,5 @@ impl Config {
         config.audio_file_path = args.value_of("file").unwrap();
 
         config
-    }
-
-    pub fn create_instance_settings(&self) -> InstanceSettings {
-        let mut instance_settings = InstanceSettings::default();
-
-        instance_settings.volume = Value::from(self.volume);
-
-        instance_settings
     }
 }
