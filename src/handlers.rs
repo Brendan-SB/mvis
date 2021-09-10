@@ -1,11 +1,5 @@
-fn handle_mp3() {
+pub fn handle_mp3() {}
 
-}
+pub fn handle_ogg() {}
 
-fn handle_ogg() {
-
-}
-
-fn handle_wav() {
-
-}
+pub fn handle_wav() {}

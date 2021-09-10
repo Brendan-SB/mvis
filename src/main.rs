@@ -1,23 +1,12 @@
+mod audio;
 mod config;
 mod consts;
 mod fft;
+mod handlers;
 
+use crate::audio::run;
 use config::Config;
-use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-use std::path::Path;
-
-fn run<T>(config: &Config, device: &cpal::Device, device_config: &cpal::SupportedStreamConfig)
-where
-    T: 'static + Send + cpal::Sample + audio::Sample + audio::Translate<f32>,
-    f32: audio::Translate<i16>,
-{
-    match config.audio_file_path.split(".").last().unwrap() {
-        "mp3" => {}
-        "ogg" => {}
-        "wav" => {}
-        _ => panic!("That file extension is not supported."),
-    }
-}
+use cpal::traits::{DeviceTrait, HostTrait};
 
 fn main() {
     Config::try_create_default_config();
