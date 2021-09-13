@@ -28,7 +28,14 @@ impl Config {
 
             File::create(file_path)
                 .unwrap()
-                .write_all(&serde_json::to_string(&Self::new()).unwrap().as_bytes())
+                .write_all(
+                    &serde_json::to_string(&Self {
+                        audio_file_path: String::new(),
+                        volume: 1_f64,
+                    })
+                    .unwrap()
+                    .as_bytes(),
+                )
                 .unwrap();
         }
     }
@@ -43,7 +50,7 @@ impl Config {
             "Sets the volume.",
             "VOLUME",
             Occur::Optional,
-            Some(String::from("1.0")),
+            None,
         );
         args.option(
             "f",
@@ -68,28 +75,13 @@ impl Config {
                     .unwrap(),
             ),
         );
-        args.option(
-            "t",
-            "type",
-            "Override of the type of file you want to play.",
-            "TYPE",
-            Occur::Optional,
-            None,
-        );
 
         args.parse(env::args()).unwrap();
 
         args
     }
 
-    fn new() -> Self {
-        Self {
-            audio_file_path: String::new(),
-            volume: 1_f64,
-        }
-    }
-
-    fn new_from_config(path: String) -> Self {
+    fn from_config(path: String) -> Self {
         match File::open(path) {
             Ok(mut file) => {
                 let mut contents = String::new();
@@ -102,8 +94,8 @@ impl Config {
         }
     }
 
-    pub fn new_from_arguments(args: &Args) -> Self {
-        let mut config = Self::new_from_config(args.value_of("config").unwrap());
+    pub fn from_arguments(args: &Args) -> Self {
+        let mut config = Self::from_config(args.value_of("config").unwrap());
 
         config.volume = args
             .validated_value_of(

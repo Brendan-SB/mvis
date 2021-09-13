@@ -1,10 +1,9 @@
-mod audio;
 mod config;
 mod consts;
 mod fft;
-mod handlers;
+mod stream;
 
-use crate::audio::run;
+use crate::stream::run;
 use config::Config;
 use cpal::traits::{DeviceTrait, HostTrait};
 
@@ -19,7 +18,7 @@ fn main() {
         return;
     }
 
-    let config = Config::new_from_arguments(&args);
+    let config = Config::from_arguments(&args);
 
     let host = cpal::default_host();
     let device = host.default_output_device().unwrap();
