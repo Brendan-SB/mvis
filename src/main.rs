@@ -1,11 +1,20 @@
 mod config;
 mod consts;
 mod fft;
-mod stream;
 
-use crate::stream::run;
 use config::Config;
-use cpal::traits::{DeviceTrait, HostTrait};
+use std::{
+    thread::sleep,
+    io::{Read, BufReader},
+    fs::File,
+    time::{SystemTime, Duration},
+};
+use kira::{
+    sound::SoundSettings,
+    manager::{AudioManager, AudioManagerSettings},
+    instance::InstanceSettings,
+    Value,
+};
 
 fn main() {
     Config::try_create_default_config();
@@ -20,13 +29,16 @@ fn main() {
 
     let config = Config::from_arguments(&args);
 
-    let host = cpal::default_host();
-    let device = host.default_output_device().unwrap();
-    let device_config = device.default_output_config().unwrap();
+    let mut audio_manager = AudioManager::new(AudioManagerSettings::default()).unwrap();
 
-    match device_config.sample_format() {
-        cpal::SampleFormat::F32 => run::<f32>(&config, &device, &device_config),
-        cpal::SampleFormat::I16 => run::<i16>(&config, &device, &device_config),
-        cpal::SampleFormat::U16 => run::<u16>(&config, &device, &device_config),
-    }
+    println!("Loading sound...");
+
+    let mut sound_handle = audio_manager.load_sound(&config.audio_file_path, SoundSettings::default()).unwrap();
+
+    let mut instance_settings = InstanceSettings::default();
+    instance_settings.volume = Value::from(config.volume);
+
+    sound_handle.play(instance_settings).unwrap();
+
+    sleep(Duration::from_secs_f64(sound_handle.duration()));
 }
