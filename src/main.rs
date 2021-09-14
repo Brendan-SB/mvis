@@ -3,18 +3,19 @@ mod consts;
 mod fft;
 
 use config::Config;
-use std::{
-    thread::sleep,
-    io::{Read, BufReader},
-    fs::File,
-    time::{SystemTime, Duration},
-};
 use kira::{
-    sound::SoundSettings,
-    manager::{AudioManager, AudioManagerSettings},
     instance::InstanceSettings,
+    manager::{AudioManager, AudioManagerSettings},
+    sound::{Sound, SoundSettings},
     Value,
 };
+use num_complex::Complex;
+use std::{
+    thread::{spawn, sleep},
+    time::{Duration, SystemTime},
+};
+use fft::fft_thread;
+use ringbuf::RingBuffer;
 
 fn main() {
     Config::try_create_default_config();
@@ -33,12 +34,28 @@ fn main() {
 
     println!("Loading sound...");
 
-    let mut sound_handle = audio_manager.load_sound(&config.audio_file_path, SoundSettings::default()).unwrap();
+    let sound = Sound::from_file(&config.audio_file_path, SoundSettings::default()).unwrap();
+    let mut sound_handle = audio_manager.add_sound(sound.clone()).unwrap();
 
-    let mut instance_settings = InstanceSettings::default();
-    instance_settings.volume = Value::from(config.volume);
+    sound_handle
+        .play({
+            let mut instance_settings = InstanceSettings::default();
 
-    sound_handle.play(instance_settings).unwrap();
+            instance_settings.volume = Value::from(config.volume);
 
-    sleep(Duration::from_secs_f64(sound_handle.duration()));
+            instance_settings
+        })
+        .unwrap();
+
+    let start_time = SystemTime::now();
+
+    let sound_handle_duration_millis = sound_handle.duration() * 1000_f64;
+
+    let (mut producer, mut consumer) = RingBuffer::new((sound_handle_duration_millis / 20_f64) as usize).split();
+
+    let fft_worker = spawn(move || {
+        fft_thread(&sound, sound_handle_duration_millis as i64, &mut producer); 
+    });
+
+    sleep(Duration::from_secs_f64(sound_handle.duration() - start_time.elapsed().unwrap().as_secs_f64()));
 }

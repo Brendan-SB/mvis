@@ -525,6 +525,7 @@ dependencies = [
  "kira",
  "ncurses",
  "num-complex",
+ "ringbuf",
  "serde",
  "serde_json",
 ]
