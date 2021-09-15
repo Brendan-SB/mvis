@@ -1,10 +1,7 @@
-use num_complex::Complex;
-use std::{
-    time::SystemTime,
-    f32::consts::PI,
-};
-use ringbuf::Producer;
 use kira::sound::Sound;
+use num_complex::Complex;
+use ringbuf::Producer;
+use std::f32::consts::PI;
 
 fn fft(input: &[Complex<f32>]) -> Vec<Complex<f32>> {
     fn fft_inner(buf_a: &mut [Complex<f32>], buf_b: &mut [Complex<f32>], n: usize, step: usize) {
@@ -47,18 +44,10 @@ fn fft(input: &[Complex<f32>]) -> Vec<Complex<f32>> {
 }
 
 pub fn fft_thread(sound: &Sound, duration: i64, producer: &mut Producer<Vec<Complex<f32>>>) {
-    let mut timer = SystemTime::now();
-
     for (start, end) in (0..=duration - 20)
         .step_by(20)
         .zip((20..=duration).step_by(20))
     {
-        if timer.elapsed().unwrap().as_secs_f64() >= 20_f64 {
-            // update TUI display with ffted data
-
-            timer = SystemTime::now();
-        }
-
         let mut buffer = Vec::new();
 
         for i in start..=end {
