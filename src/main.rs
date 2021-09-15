@@ -80,9 +80,9 @@ fn main() {
             }
         }
 
-        frame_timer = SystemTime::now();
-        
         i += 1;
+
+        frame_timer = SystemTime::now();
     }
 
     fft_worker.join().unwrap();
