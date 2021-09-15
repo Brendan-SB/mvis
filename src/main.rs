@@ -57,32 +57,34 @@ fn main() {
         })
         .unwrap();
 
-    let mut frame_timer = SystemTime::now();
+    {
+        let mut frame_timer = SystemTime::now();
 
-    let duration_1_millis = Duration::from_millis(1);
-    let duration_20_millis = Duration::from_millis(20);
+        let duration_1_millis = Duration::from_millis(1);
+        let duration_20_millis = Duration::from_millis(20);
 
-    let mut i = 0;
+        let mut i = 0;
 
-    while i < consumer.capacity() {
-        if consumer.is_empty() {
-            sleep(duration_1_millis);
+        while i < consumer.capacity() {
+            if consumer.is_empty() {
+                sleep(duration_1_millis);
 
-            continue;
-        }
-
-        {
-            let remaining = duration_20_millis.as_secs_f64() - frame_timer.elapsed().unwrap().as_secs_f64();
-
-            if remaining > 0_f64 {
-                sleep(Duration::from_secs_f64(remaining));
-
+                continue;
             }
+
+            {
+                let remaining =
+                    duration_20_millis.as_secs_f64() - frame_timer.elapsed().unwrap().as_secs_f64();
+
+                if remaining > 0_f64 {
+                    sleep(Duration::from_secs_f64(remaining));
+                }
+            }
+
+            i += 1;
+
+            frame_timer = SystemTime::now();
         }
-
-        i += 1;
-
-        frame_timer = SystemTime::now();
     }
 
     fft_worker.join().unwrap();
