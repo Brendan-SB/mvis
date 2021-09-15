@@ -51,7 +51,7 @@ pub fn fft_thread(sound: &Sound, duration: i64, producer: &mut Producer<Vec<Comp
         let mut buffer = Vec::new();
 
         for i in start..=end {
-            let frame = sound.get_frame_at_position(i as f64);
+            let frame = sound.get_frame_at_position(i as f64 / 1000_f64);
 
             buffer.push(Complex::new((frame.right + frame.left) / 2_f32, 0_f32));
         }

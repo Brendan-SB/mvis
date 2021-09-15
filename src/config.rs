@@ -16,6 +16,8 @@ use std::{
 pub struct Config {
     pub audio_file_path: String,
     pub volume: f64,
+    pub thread_sleep_interval: i16,
+    pub sample_interval: i16,
 }
 
 impl Config {
@@ -30,8 +32,10 @@ impl Config {
                 .unwrap()
                 .write_all(
                     &serde_json::to_string(&Self {
-                        audio_file_path: String::new(),
+                        audio_file_path: String::from("~/.config/mvis/config.json."),
                         volume: 1_f64,
+                        sample_interval: 20,
+                        thread_sleep_interval: 1,
                     })
                     .unwrap()
                     .as_bytes(),
@@ -44,6 +48,21 @@ impl Config {
         let mut args = Args::new(PROGRAM_NAME, PROGRAM_DESC);
 
         args.flag("h", "help", "Print the usage menu.");
+        args.option(
+            "c",
+            "config",
+            "The path to the config file. Default: ~/.config/mvis/config.json.",
+            "CONFIG",
+            Occur::Req,
+            Some(
+                home_dir()
+                    .unwrap()
+                    .join(".config/mvis/config.json")
+                    .into_os_string()
+                    .into_string()
+                    .unwrap(),
+            ),
+        );
         args.option(
             "v",
             "volume",
@@ -61,18 +80,23 @@ impl Config {
             None,
         );
         args.option(
-            "c",
-            "config",
-            "The path to the config file. Default: ~/.config/mvis/config.json.",
-            "CONFIG",
+            "s",
+            "sample-interval",
+            "The interval the sample thread should take from the buffer at each step in milliseconds. Default: 20.",
+            "SAMPLE_INTERVAL",
             Occur::Req,
             Some(
-                home_dir()
-                    .unwrap()
-                    .join(".config/mvis/config.json")
-                    .into_os_string()
-                    .into_string()
-                    .unwrap(),
+                String::from("20")
+            ),
+        );
+        args.option(
+            "t",
+            "thread-sleep-interval",
+            "The duration the thread should sleep if the stack is empty in milliseconds. Default: 1",
+            "THREAD_SLEEP_INTERVAL",
+            Occur::Req,
+            Some(
+                String::from("1")
             ),
         );
 
@@ -82,16 +106,14 @@ impl Config {
     }
 
     fn from_config(path: String) -> Self {
-        match File::open(path) {
-            Ok(mut file) => {
-                let mut contents = String::new();
+        let mut contents = String::new();
 
-                file.read_to_string(&mut contents).unwrap();
+        File::open(&path)
+            .unwrap()
+            .read_to_string(&mut contents)
+            .unwrap();
 
-                serde_json::from_str(contents.as_str()).unwrap()
-            }
-            Err(_) => panic!("Config file does not exist."),
-        }
+        serde_json::from_str(contents.as_str()).unwrap()
     }
 
     pub fn from_arguments(args: &Args) -> Self {
@@ -107,6 +129,24 @@ impl Config {
             )
             .unwrap();
         config.audio_file_path = args.value_of("file").unwrap();
+        config.thread_sleep_interval = args
+            .validated_value_of(
+                "thread-sleep-interval",
+                &[Box::new(OrderValidation::new(
+                    Order::GreaterThanOrEqual,
+                    1_i16,
+                ))],
+            )
+            .unwrap();
+        config.sample_interval = args
+            .validated_value_of(
+                "sample-interval",
+                &[Box::new(OrderValidation::new(
+                    Order::GreaterThanOrEqual,
+                    1_i16,
+                ))],
+            )
+            .unwrap();
 
         config
     }

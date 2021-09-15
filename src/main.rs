@@ -9,11 +9,10 @@ use kira::{
     sound::{Sound, SoundSettings},
     Value,
 };
-use num_complex::Complex;
 use ringbuf::RingBuffer;
 use std::{
     thread::{sleep, spawn},
-    time::{Duration, SystemTime},
+    time::Duration,
 };
 
 fn main() {
@@ -36,6 +35,15 @@ fn main() {
     let sound = Sound::from_file(&config.audio_file_path, SoundSettings::default()).unwrap();
     let mut sound_handle = audio_manager.add_sound(sound.clone()).unwrap();
 
+    let sound_handle_duration_millis = sound_handle.duration() * 1000_f64;
+
+    let (mut producer, mut consumer) =
+        RingBuffer::new((sound_handle_duration_millis / 20_f64) as usize).split();
+
+    spawn(move || {
+        fft::fft_thread(&sound, sound_handle_duration_millis as i64, &mut producer);
+    });
+
     sound_handle
         .play({
             let mut instance_settings = InstanceSettings::default();
@@ -46,18 +54,24 @@ fn main() {
         })
         .unwrap();
 
-    let start_time = SystemTime::now();
+    {
+        let duration_1_millis = Duration::from_millis(1);
+        let duration_20_millis = Duration::from_millis(20);
 
-    let sound_handle_duration_millis = sound_handle.duration() * 1000_f64;
+        let mut i = 0;
 
-    let (mut producer, mut consumer) =
-        RingBuffer::new((sound_handle_duration_millis / 20_f64) as usize).split();
+        while i < consumer.capacity() {
+            if consumer.is_empty() {
+                sleep(duration_1_millis);
 
-    let fft_thread = spawn(move || {
-        fft::fft_thread(&sound, sound_handle_duration_millis as i64, &mut producer);
-    });
+                continue;
+            }
 
-    sleep(Duration::from_secs_f64(
-        sound_handle.duration() - start_time.elapsed().unwrap().as_secs_f64(),
-    ));
+            let data = consumer.pop();
+
+            sleep(duration_20_millis);
+
+            i += 1;
+        }
+    }
 }
