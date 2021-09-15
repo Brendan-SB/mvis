@@ -1,8 +1,11 @@
 mod config;
 mod consts;
+mod display;
 mod fft;
 
 use config::Config;
+use display::Display;
+use fft::fft_thread;
 use kira::{
     instance::InstanceSettings,
     manager::{AudioManager, AudioManagerSettings},
@@ -12,7 +15,7 @@ use kira::{
 use ringbuf::RingBuffer;
 use std::{
     thread::{sleep, spawn},
-    time::Duration,
+    time::{Duration, SystemTime},
 };
 
 fn main() {
@@ -40,8 +43,8 @@ fn main() {
     let (mut producer, mut consumer) =
         RingBuffer::new((sound_handle_duration_millis / 20_f64) as usize).split();
 
-    spawn(move || {
-        fft::fft_thread(&sound, sound_handle_duration_millis as i64, &mut producer);
+    let fft_worker = spawn(move || {
+        fft_thread(&sound, sound_handle_duration_millis as i64, &mut producer);
     });
 
     sound_handle
@@ -54,24 +57,33 @@ fn main() {
         })
         .unwrap();
 
-    {
-        let duration_1_millis = Duration::from_millis(1);
-        let duration_20_millis = Duration::from_millis(20);
+    let mut frame_timer = SystemTime::now();
 
-        let mut i = 0;
+    let duration_1_millis = Duration::from_millis(1);
+    let duration_20_millis = Duration::from_millis(20);
 
-        while i < consumer.capacity() {
-            if consumer.is_empty() {
-                sleep(duration_1_millis);
+    let mut i = 0;
 
-                continue;
-            }
+    while i < consumer.capacity() {
+        if consumer.is_empty() {
+            sleep(duration_1_millis);
 
-            let data = consumer.pop();
-
-            sleep(duration_20_millis);
-
-            i += 1;
+            continue;
         }
+
+        {
+            let remaining = duration_20_millis.as_secs_f64() - frame_timer.elapsed().unwrap().as_secs_f64();
+
+            if remaining > 0_f64 {
+                sleep(Duration::from_secs_f64(remaining));
+
+            }
+        }
+
+        frame_timer = SystemTime::now();
+        
+        i += 1;
     }
+
+    fft_worker.join().unwrap();
 }

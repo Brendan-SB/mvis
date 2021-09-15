@@ -86,7 +86,7 @@ impl Config {
             "SAMPLE_INTERVAL",
             Occur::Req,
             Some(
-                String::from("20")
+                String::from("15")
             ),
         );
         args.option(
