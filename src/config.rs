@@ -32,7 +32,7 @@ impl Config {
                 .unwrap()
                 .write_all(
                     &serde_json::to_string(&Self {
-                        audio_file_path: String::from("~/.config/mvis/config.json."),
+                        audio_file_path: String::new(),
                         volume: 1_f64,
                         sample_interval: 20,
                         thread_sleep_interval: 1,
