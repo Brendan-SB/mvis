@@ -4,7 +4,6 @@ mod display;
 mod fft;
 
 use config::Config;
-use display::Display;
 use fft::fft;
 use kira::{
     instance::InstanceSettings,
@@ -14,7 +13,7 @@ use kira::{
 };
 use num_complex::Complex;
 use std::{
-    thread::{sleep, spawn},
+    thread::sleep,
     time::{Duration, SystemTime},
 };
 
