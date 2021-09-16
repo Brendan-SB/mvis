@@ -1,9 +1,7 @@
-use kira::sound::Sound;
 use num_complex::Complex;
-use ringbuf::Producer;
 use std::f32::consts::PI;
 
-fn fft(input: &[Complex<f32>]) -> Vec<Complex<f32>> {
+pub fn fft(input: &[Complex<f32>]) -> Vec<Complex<f32>> {
     fn fft_inner(buf_a: &mut [Complex<f32>], buf_b: &mut [Complex<f32>], n: usize, step: usize) {
         static I: Complex<f32> = Complex { re: 0.0, im: 1.0 };
 
@@ -41,21 +39,4 @@ fn fft(input: &[Complex<f32>]) -> Vec<Complex<f32>> {
     fft_inner(&mut buf_a, &mut buf_b, n, 1);
 
     buf_a
-}
-
-pub fn fft_thread(sound: &Sound, duration: i64, producer: &mut Producer<Vec<Complex<f32>>>) {
-    for (start, end) in (0..=duration - 20)
-        .step_by(20)
-        .zip((20..=duration).step_by(20))
-    {
-        let mut buffer = Vec::new();
-
-        for i in start..=end {
-            let frame = sound.get_frame_at_position(i as f64 / 1000_f64);
-
-            buffer.push(Complex::new((frame.right + frame.left) / 2_f32, 0_f32));
-        }
-
-        producer.push(fft(&buffer)).unwrap();
-    }
 }

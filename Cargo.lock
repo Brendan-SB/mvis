@@ -578,7 +578,6 @@ dependencies = [
  "home",
  "kira",
  "num-complex",
- "ringbuf",
  "serde",
  "serde_json",
  "tui",

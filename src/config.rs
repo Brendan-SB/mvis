@@ -17,7 +17,7 @@ pub struct Config {
     pub audio_file_path: String,
     pub volume: f64,
     pub thread_sleep_interval: i16,
-    pub sample_interval: i16,
+    pub sample_interval: usize,
 }
 
 impl Config {
@@ -143,7 +143,7 @@ impl Config {
                 "sample-interval",
                 &[Box::new(OrderValidation::new(
                     Order::GreaterThanOrEqual,
-                    1_i16,
+                    1_usize,
                 ))],
             )
             .unwrap();
