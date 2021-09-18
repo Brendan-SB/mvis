@@ -38,7 +38,7 @@ fn main() {
     let sound = Sound::from_file(&config.audio_file_path, SoundSettings::default()).unwrap();
     let mut sound_handle = audio_manager.add_sound(sound.clone()).unwrap();
 
-    let mut display = Display::new(&config);
+    let mut display = Display::new();
 
     let sound_handle_duration_millis = sound_handle.duration() * 1000_f64;
 
@@ -61,7 +61,7 @@ fn main() {
         {
             let mut buffer = Vec::new();
 
-            for j in i..=i + sample_interval_i64 {
+            for j in i..=i + sample_interval_i64 * config.level_of_detail as i64 {
                 let frame = sound.get_frame_at_position(j as f64 / 1000_f64);
 
                 buffer.push(Complex::new((frame.right + frame.left) / 2_f32, 0_f32));

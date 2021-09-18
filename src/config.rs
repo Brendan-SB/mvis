@@ -17,6 +17,7 @@ pub struct Config {
     pub audio_file_path: String,
     pub volume: f64,
     pub sample_interval: usize,
+    pub level_of_detail: usize,
 }
 
 impl Config {
@@ -34,6 +35,7 @@ impl Config {
                         audio_file_path: String::new(),
                         volume: 1_f64,
                         sample_interval: 15_usize,
+                        level_of_detail: 10_usize,
                     })
                     .unwrap()
                     .as_bytes(),
@@ -80,12 +82,20 @@ impl Config {
         args.option(
             "s",
             "sample-interval",
-            "The interval the sample thread should take from the buffer at each step in milliseconds. Default: 20.",
+            "The interval the sample thread should take from the buffer at each step in milliseconds. Default: 15.",
             "SAMPLE_INTERVAL",
             Occur::Req,
             Some(
                 String::from("15")
             ),
+        );
+        args.option(
+            "l",
+            "level-of-detail",
+            "The level between the steps in the sample for loop. Default: 10.",
+            "LEVEL_OF_DETAIL",
+            Occur::Req,
+            Some(String::from("10")),
         );
 
         args.parse(env::args()).unwrap();
@@ -124,6 +134,15 @@ impl Config {
                     Order::GreaterThanOrEqual,
                     1_usize,
                 ))],
+            )
+            .unwrap();
+        config.level_of_detail = args
+            .validated_value_of(
+                "level-of-detail",
+                &[
+                    Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 1_usize)),
+                    Box::new(OrderValidation::new(Order::LessThanOrEqual, 1000_usize)),
+                ],
             )
             .unwrap();
 

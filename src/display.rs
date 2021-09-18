@@ -1,4 +1,3 @@
-use crate::config::Config;
 use num_complex::Complex;
 use std::io::{stdout, Stdout};
 use tui::{
@@ -7,18 +6,17 @@ use tui::{
     Terminal,
 };
 
-pub struct Display<'a> {
-    config: &'a Config,
+pub struct Display {
     terminal: Terminal<CrosstermBackend<Stdout>>,
 }
 
-impl<'a> Display<'a> {
-    pub fn new(config: &'a Config) -> Self {
+impl Display {
+    pub fn new() -> Self {
         let mut terminal = Terminal::new(CrosstermBackend::new(stdout())).unwrap();
 
         terminal.clear().unwrap();
 
-        Self { config, terminal }
+        Self { terminal }
     }
 
     pub fn update(&mut self, data: &[Complex<f32>]) {
