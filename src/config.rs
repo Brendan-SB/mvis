@@ -16,7 +16,6 @@ use std::{
 pub struct Config {
     pub audio_file_path: String,
     pub volume: f64,
-    pub thread_sleep_interval: i16,
     pub sample_interval: usize,
 }
 
@@ -34,8 +33,7 @@ impl Config {
                     &serde_json::to_string(&Self {
                         audio_file_path: String::new(),
                         volume: 1_f64,
-                        sample_interval: 20,
-                        thread_sleep_interval: 1,
+                        sample_interval: 15_usize,
                     })
                     .unwrap()
                     .as_bytes(),
@@ -89,16 +87,6 @@ impl Config {
                 String::from("15")
             ),
         );
-        args.option(
-            "t",
-            "thread-sleep-interval",
-            "The duration the thread should sleep if the stack is empty in milliseconds. Default: 1",
-            "THREAD_SLEEP_INTERVAL",
-            Occur::Req,
-            Some(
-                String::from("1")
-            ),
-        );
 
         args.parse(env::args()).unwrap();
 
@@ -129,15 +117,6 @@ impl Config {
             )
             .unwrap();
         config.audio_file_path = args.value_of("file").unwrap();
-        config.thread_sleep_interval = args
-            .validated_value_of(
-                "thread-sleep-interval",
-                &[Box::new(OrderValidation::new(
-                    Order::GreaterThanOrEqual,
-                    1_i16,
-                ))],
-            )
-            .unwrap();
         config.sample_interval = args
             .validated_value_of(
                 "sample-interval",
