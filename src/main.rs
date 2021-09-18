@@ -4,6 +4,7 @@ mod display;
 mod fft;
 
 use config::Config;
+use display::Display;
 use fft::fft;
 use kira::{
     instance::InstanceSettings,
@@ -37,6 +38,13 @@ fn main() {
     let sound = Sound::from_file(&config.audio_file_path, SoundSettings::default()).unwrap();
     let mut sound_handle = audio_manager.add_sound(sound.clone()).unwrap();
 
+    let mut display = Display::new(&config);
+
+    let sound_handle_duration_millis = sound_handle.duration() * 1000_f64;
+
+    let sample_interval_i64 = config.sample_interval as i64;
+    let sample_interval_f64 = config.sample_interval as f64;
+    
     let mut frame_timer = SystemTime::now();
 
     sound_handle
@@ -49,28 +57,23 @@ fn main() {
         })
         .unwrap();
 
-    let sound_handle_duration_millis = sound_handle.duration() * 1000_f64;
-
-    let sample_interval_i64 = config.sample_interval as i64;
-    let sample_interval_f64 = config.sample_interval as f64;
-
     for i in (0..=sound_handle_duration_millis as i64).step_by(config.sample_interval) {
         {
             let mut buffer = Vec::new();
 
-            for i in i..=i + sample_interval_i64 {
-                let frame = sound.get_frame_at_position(i as f64 / 1000_f64);
+            for j in i..=i + sample_interval_i64 {
+                let frame = sound.get_frame_at_position(j as f64 / 1000_f64);
 
                 buffer.push(Complex::new((frame.right + frame.left) / 2_f32, 0_f32));
             }
 
-            fft(&buffer);
+            display.update(&fft(&buffer));
         }
 
-        let remaining = sample_interval_f64 - frame_timer.elapsed().unwrap().as_secs_f64();
+        let remaining = sample_interval_f64 / 1000_f64 - frame_timer.elapsed().unwrap().as_secs_f64();
 
         if remaining > 0_f64 {
-            sleep(Duration::from_secs_f64(remaining / 1000_f64));
+            sleep(Duration::from_secs_f64(remaining));
         }
 
         frame_timer = SystemTime::now();
