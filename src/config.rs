@@ -69,7 +69,7 @@ impl Config {
             "Sets the volume.",
             "VOLUME",
             Occur::Optional,
-            None,
+            Some(String::from("1")),
         );
         args.option(
             "f",
