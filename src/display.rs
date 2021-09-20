@@ -1,18 +1,18 @@
 use num_complex::Complex;
 use std::io::{stdout, Stdout};
 use tui::{
-    backend::CrosstermBackend,
+    backend::TermionBackend,
     widgets::{BarChart, Block, Borders},
     Terminal,
 };
 
 pub struct Display {
-    terminal: Terminal<CrosstermBackend<Stdout>>,
+    terminal: Terminal<TermionBackend<Stdout>>,
 }
 
 impl Display {
     pub fn new() -> Self {
-        let mut terminal = Terminal::new(CrosstermBackend::new(stdout())).unwrap();
+        let mut terminal = Terminal::new(TermionBackend::new(stdout())).unwrap();
 
         terminal.clear().unwrap();
 
