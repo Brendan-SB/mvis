@@ -44,7 +44,7 @@ fn main() {
 
     let sample_interval_f64 = config.sample_interval as f64;
 
-    let offset = config.sample_interval as i64 * config.level_of_detail as i64;
+    let offset = (config.sample_interval * config.level_of_detail) as i64;
 
     let mut frame_timer = SystemTime::now();
 
