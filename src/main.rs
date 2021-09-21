@@ -42,10 +42,9 @@ fn main() {
 
     let sound_handle_duration_millis = sound_handle.duration() * 1000_f64;
 
-    let sample_interval_i64 = config.sample_interval as i64;
     let sample_interval_f64 = config.sample_interval as f64;
 
-    let level_of_detail_i64 = config.level_of_detail as i64;
+    let offset = config.sample_interval as i64 * config.level_of_detail as i64;
 
     let mut frame_timer = SystemTime::now();
 
@@ -63,7 +62,7 @@ fn main() {
         {
             let mut buffer = Vec::new();
 
-            for j in i..=i + sample_interval_i64 * level_of_detail_i64 {
+            for j in i..=i + offset {
                 let frame = sound.get_frame_at_position(j as f64 / 1000_f64);
 
                 buffer.push(Complex::new((frame.right + frame.left) / 2_f32, 0_f32));
