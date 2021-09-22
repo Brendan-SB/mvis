@@ -36,7 +36,7 @@ impl Config {
                         audio_file_path: String::new(),
                         volume: 1_f64,
                         sample_interval: 15_usize,
-                        level_of_detail: 5_usize,
+                        level_of_detail: 10_usize,
                         bar_width: 1_u16,
                     })
                     .unwrap()
@@ -97,7 +97,7 @@ impl Config {
             "The level between the steps in the sample for loop. Default: 10.",
             "LEVEL_OF_DETAIL",
             Occur::Req,
-            Some(String::from("5")),
+            Some(String::from("10")),
         );
         args.option(
             "b",
