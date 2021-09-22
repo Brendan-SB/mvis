@@ -18,6 +18,7 @@ pub struct Config {
     pub volume: f64,
     pub sample_interval: usize,
     pub level_of_detail: usize,
+    pub bar_width: u16,
 }
 
 impl Config {
@@ -36,6 +37,7 @@ impl Config {
                         volume: 1_f64,
                         sample_interval: 15_usize,
                         level_of_detail: 10_usize,
+                        bar_width: 1_u16,
                     })
                     .unwrap()
                     .as_bytes(),
@@ -97,6 +99,14 @@ impl Config {
             Occur::Req,
             Some(String::from("10")),
         );
+        args.option(
+            "b",
+            "bar-width",
+            "The width of the bars.",
+            "BAR_WIDTH",
+            Occur::Optional,
+            Some(String::from("1")),
+        );
 
         args.parse(env::args()).unwrap();
 
@@ -142,6 +152,15 @@ impl Config {
                 &[
                     Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 1_usize)),
                     Box::new(OrderValidation::new(Order::LessThanOrEqual, 1000_usize)),
+                ],
+            )
+            .unwrap();
+        config.bar_width = args
+            .validated_value_of(
+                "bar-width",
+                &[
+                    Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 1_u16)),
+                    Box::new(OrderValidation::new(Order::LessThanOrEqual, 10_16)),
                 ],
             )
             .unwrap();

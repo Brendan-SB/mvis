@@ -38,14 +38,14 @@ fn main() {
     let sound = Sound::from_file(&config.audio_file_path, SoundSettings::default()).unwrap();
     let mut sound_handle = audio_manager.add_sound(sound.clone()).unwrap();
 
-    let mut display = Display::new();
+    let mut display = Display::new(&config);
 
     let sound_handle_duration_millis = sound_handle.duration() * 1000_f64;
 
     let sample_interval_f64 = config.sample_interval as f64;
 
     let offset = (config.sample_interval * config.level_of_detail) as i64;
-    
+
     let mut frame_timer = SystemTime::now();
 
     sound_handle

@@ -1,3 +1,4 @@
+use crate::config::Config;
 use num_complex::Complex;
 use std::io::{stdout, Stdout};
 use tui::{
@@ -6,20 +7,23 @@ use tui::{
     Terminal,
 };
 
-pub struct Display {
+pub struct Display<'a> {
+    config: &'a Config,
     terminal: Terminal<TermionBackend<Stdout>>,
 }
 
-impl Display {
-    pub fn new() -> Self {
+impl<'a> Display<'a> {
+    pub fn new(config: &'a Config) -> Self {
         let mut terminal = Terminal::new(TermionBackend::new(stdout())).unwrap();
 
         terminal.clear().unwrap();
 
-        Self { terminal }
+        Self { config, terminal }
     }
 
     pub fn update(&mut self, data: &[Complex<f32>]) {
+        let bar_width = self.config.bar_width;
+
         self.terminal
             .draw(move |f| {
                 let data_dist = data
@@ -29,7 +33,7 @@ impl Display {
 
                 let bar_chart = BarChart::default()
                     .block(Block::default().title("mvis").borders(Borders::ALL))
-                    .bar_width(3)
+                    .bar_width(bar_width)
                     .data(&data_dist);
 
                 f.render_widget(bar_chart, f.size());
