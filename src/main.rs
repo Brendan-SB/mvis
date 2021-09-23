@@ -69,8 +69,7 @@ fn main() {
             display.update(&fft(&buffer));
         }
 
-        let remaining =
-            sample_interval_f64_millis - frame_timer.elapsed().unwrap().as_secs_f64();
+        let remaining = sample_interval_f64_millis - frame_timer.elapsed().unwrap().as_secs_f64();
 
         if remaining > 0_f64 {
             sleep(Duration::from_secs_f64(remaining));
