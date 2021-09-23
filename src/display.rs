@@ -21,6 +21,18 @@ impl<'a> Display<'a> {
         Self { config, terminal }
     }
 
+    fn compute_offset(terminal_width: f64, bar_width: f64, data_dist: &Vec<u64>) -> usize {
+        let offset = (terminal_width as f64
+            / (bar_width as f64 * data_dist.len() as f64))
+            .round() as usize;
+
+        if offset == 0 {
+            return 1;
+        }
+
+        offset
+    }
+
     pub fn update(&mut self, data: &[Complex<f32>]) {
         let bar_width = self.config.bar_width;
         let terminal_width = self.terminal.size().unwrap().width as usize;
@@ -35,14 +47,7 @@ impl<'a> Display<'a> {
                         .map(|x| ((x.re * x.re + x.im * x.im).round() as u64))
                         .collect::<Vec<u64>>();
 
-                    let mut offset = (terminal_width as f64
-                        / (bar_width as f64 * data_dist.len() as f64))
-                        .round() as usize;
-
-                    if offset == 0 {
-                        offset = 1;
-                    }
-
+                    let offset = Self::compute_offset(terminal_width as f64, bar_width as f64, &data_dist);
                     for i in (0..data_dist.len() - offset).step_by(offset) {
                         let mut sum = 0;
 

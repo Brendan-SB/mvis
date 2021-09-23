@@ -35,9 +35,9 @@ impl Config {
                     &serde_json::to_string(&Self {
                         audio_file_path: String::new(),
                         volume: 1_f64,
-                        sample_interval: 15_usize,
-                        level_of_detail: 10_usize,
-                        bar_width: 1_u16,
+                        sample_interval: 15,
+                        level_of_detail: 10,
+                        bar_width: 1,
                     })
                     .unwrap()
                     .as_bytes(),
@@ -150,8 +150,8 @@ impl Config {
             .validated_value_of(
                 "level-of-detail",
                 &[
-                    Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 1_usize)),
-                    Box::new(OrderValidation::new(Order::LessThanOrEqual, 1000_usize)),
+                    Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 1)),
+                    Box::new(OrderValidation::new(Order::LessThanOrEqual, 1000)),
                 ],
             )
             .unwrap();
@@ -159,8 +159,8 @@ impl Config {
             .validated_value_of(
                 "bar-width",
                 &[
-                    Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 1_u16)),
-                    Box::new(OrderValidation::new(Order::LessThanOrEqual, 10_16)),
+                    Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 1)),
+                    Box::new(OrderValidation::new(Order::LessThanOrEqual, 10)),
                 ],
             )
             .unwrap();
