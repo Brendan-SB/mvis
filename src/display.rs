@@ -39,8 +39,9 @@ impl<'a> Display<'a> {
 
                     let offset = ((((data_dist.len() + 1) as f64)
                         + bar_width_f64 * data_dist.len() as f64)
-                        / terminal_width as f64).round() as usize;
-                    
+                        / terminal_width as f64)
+                        .round() as usize;
+
                     let offset_u64 = offset as u64;
 
                     for i in (0..data_dist.len() - offset).step_by(offset) {
