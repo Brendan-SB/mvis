@@ -142,7 +142,7 @@ impl Config {
                 "sample-interval",
                 &[Box::new(OrderValidation::new(
                     Order::GreaterThanOrEqual,
-                    1_usize,
+                    1,
                 ))],
             )
             .unwrap();
