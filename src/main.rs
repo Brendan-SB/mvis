@@ -41,7 +41,7 @@ fn main() {
     let mut display = Display::new(&config);
 
     let sound_handle_duration_millis_i64 = (sound_handle.duration() * 1000_f64) as i64;
-    let sample_interval_f64 = config.sample_interval as f64;
+    let sample_interval_f64_millis = config.sample_interval as f64 / 1000_f64;
     let offset = (config.sample_interval * config.level_of_detail) as i64;
 
     let mut frame_timer = SystemTime::now();
@@ -70,7 +70,7 @@ fn main() {
         }
 
         let remaining =
-            sample_interval_f64 / 1000_f64 - frame_timer.elapsed().unwrap().as_secs_f64();
+            sample_interval_f64_millis - frame_timer.elapsed().unwrap().as_secs_f64();
 
         if remaining > 0_f64 {
             sleep(Duration::from_secs_f64(remaining));
