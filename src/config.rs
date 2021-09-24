@@ -37,7 +37,7 @@ impl Config {
                         volume: 1_f64,
                         sample_interval: 15,
                         level_of_detail: 10,
-                        bar_width: 1,
+                        bar_width: 5,
                     })
                     .unwrap()
                     .as_bytes(),
@@ -105,7 +105,7 @@ impl Config {
             "The width of the bars.",
             "BAR_WIDTH",
             Occur::Optional,
-            Some(String::from("1")),
+            Some(String::from("5")),
         );
 
         args.parse(env::args()).unwrap();
