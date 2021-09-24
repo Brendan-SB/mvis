@@ -37,7 +37,7 @@ impl<'a> Display<'a> {
 
                     let bar_width_f64 = bar_width as f64;
 
-                    let offset = (((bar_width_f64 * (data_dist.len() + 1) as f64)
+                    let offset = ((((data_dist.len() + 1) as f64)
                         + bar_width_f64 * data_dist.len() as f64)
                         / terminal_width as f64).round() as usize;
                     
