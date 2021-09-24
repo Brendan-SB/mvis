@@ -22,7 +22,7 @@ impl<'a> Display<'a> {
     }
 
     fn calculate_offset(data_dist_len: f32, bar_width: f32, terminal_width: f32) -> usize {
-        ((data_dist_len + 1_f32 + bar_width as f32 * data_dist_len) / terminal_width).round()
+        ((data_dist_len + 1_f32 + bar_width * data_dist_len) / terminal_width).round()
             as usize
     }
 
