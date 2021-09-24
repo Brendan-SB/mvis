@@ -32,19 +32,19 @@ impl<'a> Display<'a> {
         {
             let data_dist = data
                 .iter()
-                .map(|x| ((x.re * x.re + x.im * x.im).round() as u64))
-                .collect::<Vec<u64>>();
+                .map(|x| (x.re * x.re + x.im * x.im).round())
+                .collect::<Vec<f32>>();
 
             let offset = Self::calculate_offset(data_dist.len() as f32, bar_width, terminal_width);
 
             for i in (0..data_dist.len() - offset).step_by(offset) {
-                let mut sum = 0;
+                let mut sum = 0_f32;
 
                 for j in i..=i + offset {
                     sum += data_dist[j];
                 }
 
-                data_dist_reformed.push(("", (sum as f32 / offset as f32).round() as u64));
+                data_dist_reformed.push(("", (sum / offset as f32).round() as u64));
             }
         }
 
