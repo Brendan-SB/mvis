@@ -40,6 +40,8 @@ impl<'a> Display<'a> {
                     let offset = (((bar_width_f64 * (data_dist.len() + 1) as f64)
                         + bar_width_f64 * data_dist.len() as f64)
                         / terminal_width as f64).round() as usize;
+                    
+                    let offset_u64 = offset as u64;
 
                     for i in (0..data_dist.len() - offset).step_by(offset) {
                         let mut sum = 0;
@@ -48,7 +50,7 @@ impl<'a> Display<'a> {
                             sum += data_dist[j];
                         }
 
-                        data_dist_reformed.push(("", sum / offset as u64));
+                        data_dist_reformed.push(("", sum / offset_u64));
                     }
                 }
 
