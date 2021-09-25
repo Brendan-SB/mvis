@@ -24,6 +24,7 @@ pub struct Style {
 
 #[derive(Serialize, Deserialize)]
 pub struct Config {
+    pub audio_file_path: String,
     pub volume: f64,
     pub sample_interval: usize,
     pub level_of_detail: usize,
@@ -39,7 +40,7 @@ impl Style {
     fn decode_style_value(hex: &Option<String>) -> Option<Color> {
         match hex {
             Some(v) => {
-                let decoded = hex::decode(v).unwrap();
+                let decoded = hex::decode(&v.as_bytes()).unwrap();
 
                 Some(Color::Rgb {
                     0: decoded[0],
@@ -64,6 +65,7 @@ impl Style {
 impl Config {
     fn new() -> Self {
         Self {
+            audio_file_path: String::new(),
             volume: 1_f64,
             sample_interval: 15,
             level_of_detail: 10,
@@ -72,7 +74,7 @@ impl Config {
         }
     }
 
-    pub fn try_create_default_config_file() {
+    pub fn try_create_default_config() {
         let directory_path = home_dir().unwrap().join(".config/mvis");
         let file_path = directory_path.join("config.json");
 
@@ -99,7 +101,7 @@ impl Config {
             "config",
             "The path to the config file. Default: ~/.config/mvis/config.json.",
             "CONFIG",
-            Occur::Optional,
+            Occur::Req,
             Some(
                 home_dir()
                     .unwrap()
@@ -130,7 +132,7 @@ impl Config {
             "sample-interval",
             "The interval the sample thread should take from the buffer at each step in milliseconds. Default: 15.",
             "SAMPLE_INTERVAL",
-            Occur::Optional,
+            Occur::Req,
             None,
         );
         args.option(
@@ -169,39 +171,51 @@ impl Config {
     pub fn from_arguments(args: &Args) -> Self {
         let mut config = Self::from_config(args.value_of("config").unwrap());
 
-        config.volume = args
+        if let Ok(v) = args
             .validated_value_of(
                 "volume",
                 &[
                     Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 0_f64)),
                     Box::new(OrderValidation::new(Order::LessThanOrEqual, 1_f64)),
                 ],
-            )
-            .unwrap_or(config.volume);
-        config.sample_interval = args
+            ) {
+            config.volume = v;
+        }
+
+        if let Ok(v) = args.value_of("file") {
+            config.audio_file_path = v;
+        }
+
+        if let Ok(v) = args
             .validated_value_of(
                 "sample-interval",
                 &[Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 1))],
             )
-            .unwrap_or(config.sample_interval);
-        config.level_of_detail = args
+        {
+            config.sample_interval = v;
+        }
+
+        if let Ok(v) = args
             .validated_value_of(
                 "level-of-detail",
                 &[
                     Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 1)),
                     Box::new(OrderValidation::new(Order::LessThanOrEqual, 1000)),
                 ],
-            )
-            .unwrap_or(config.level_of_detail);
-        config.bar_width = args
+            ) 
+        {
+            config.level_of_detail = v;
+        }
+        if let Ok(v) = args
             .validated_value_of(
                 "bar-width",
                 &[
                     Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 1)),
                     Box::new(OrderValidation::new(Order::LessThanOrEqual, 10)),
                 ],
-            )
-            .unwrap_or(config.bar_width);
+            ) {
+            config.bar_width = v;
+        }
 
         config
     }
