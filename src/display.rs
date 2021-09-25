@@ -3,6 +3,7 @@ use num_complex::Complex;
 use std::io::{stdout, Stdout};
 use tui::{
     backend::TermionBackend,
+    style::Style,
     widgets::{BarChart, Block, Borders},
     Terminal,
 };
@@ -10,6 +11,7 @@ use tui::{
 pub struct Display<'a> {
     config: &'a Config,
     terminal: Terminal<TermionBackend<Stdout>>,
+    bar_style: Style,
 }
 
 impl<'a> Display<'a> {
@@ -18,7 +20,11 @@ impl<'a> Display<'a> {
 
         terminal.clear().unwrap();
 
-        Self { config, terminal }
+        Self {
+            config,
+            terminal,
+            bar_style: config.style.to_tui_style(),
+        }
     }
 
     fn calculate_offset(data_dist_len: f32, bar_width: f32, terminal_width: f32) -> f32 {
@@ -54,6 +60,7 @@ impl<'a> Display<'a> {
     pub fn update(&mut self, data: &[Complex<f32>]) {
         let bar_width = self.config.bar_width;
         let terminal_width = self.terminal.size().unwrap().width;
+        let bar_style = self.bar_style.clone();
 
         self.terminal
             .draw(move |f| {
@@ -62,6 +69,7 @@ impl<'a> Display<'a> {
                 let bar_chart = BarChart::default()
                     .block(Block::default().title(PROGRAM_NAME).borders(Borders::ALL))
                     .bar_width(bar_width)
+                    .style(bar_style)
                     .data(&data_dist);
 
                 f.render_widget(bar_chart, f.size());

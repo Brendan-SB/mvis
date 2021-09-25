@@ -31,17 +31,21 @@ fn main() {
 
     let config = Config::from_arguments(&args);
 
-    let mut audio_manager = AudioManager::new(AudioManagerSettings::default()).unwrap();
+    let mut audio_manager = AudioManager::new(AudioManagerSettings::default())
+        .expect("Could not create audio manager. Make sure you have an audio device enabled.");
 
     println!("Loading sound...");
 
-    let sound = Sound::from_file(&config.audio_file_path, SoundSettings::default()).unwrap();
+    let audio_file_path: String = args.value_of("file").unwrap();
+
+    let sound =
+        Sound::from_file(&audio_file_path, SoundSettings::default()).expect("Error reading file.");
     let mut sound_handle = audio_manager.add_sound(sound.clone()).unwrap();
 
     let mut display = Display::new(&config);
 
     let sound_handle_duration_millis_i64 = (sound_handle.duration() * 1000_f64) as i64;
-    let sample_interval_f64_millis = config.sample_interval as f64 / 1000_f64;
+    let sample_interval_f64_seconds = config.sample_interval as f64 / 1000_f64;
     let offset = (config.sample_interval * config.level_of_detail) as i64;
 
     let mut frame_timer = SystemTime::now();
@@ -69,7 +73,7 @@ fn main() {
             display.update(&fft(&buffer));
         }
 
-        let remaining = sample_interval_f64_millis - frame_timer.elapsed().unwrap().as_secs_f64();
+        let remaining = sample_interval_f64_seconds - frame_timer.elapsed().unwrap().as_secs_f64();
 
         if remaining > 0_f64 {
             sleep(Duration::from_secs_f64(remaining));

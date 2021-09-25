@@ -11,17 +11,67 @@ use std::{
     fs::{create_dir_all, File},
     io::{Read, Write},
 };
+use tui::{
+    style,
+    style::{Color, Modifier},
+};
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize)]
+pub struct Style {
+    pub fg: Option<String>,
+    pub bg: Option<String>,
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct Config {
-    pub audio_file_path: String,
     pub volume: f64,
     pub sample_interval: usize,
     pub level_of_detail: usize,
     pub bar_width: u16,
+    pub style: Style,
+}
+
+impl Style {
+    fn new() -> Self {
+        Self { fg: None, bg: None }
+    }
+
+    fn decode_style_value(hex: &Option<String>) -> Option<Color> {
+        match hex {
+            Some(v) => {
+                let decoded = hex::decode(&v.as_bytes()).unwrap();
+
+                Some(Color::Rgb {
+                    0: decoded[0],
+                    1: decoded[1],
+                    2: decoded[2],
+                })
+            }
+            None => None,
+        }
+    }
+
+    pub fn to_tui_style(&self) -> style::Style {
+        style::Style {
+            fg: Self::decode_style_value(&self.fg),
+            bg: Self::decode_style_value(&self.bg),
+            add_modifier: Modifier::empty(),
+            sub_modifier: Modifier::empty(),
+        }
+    }
 }
 
 impl Config {
+    fn new() -> Self {
+        Self {
+            volume: 1_f64,
+            sample_interval: 15,
+            level_of_detail: 10,
+            bar_width: 5,
+            style: Style::new(),
+        }
+    }
+
     pub fn try_create_default_config() {
         let directory_path = home_dir().unwrap().join(".config/mvis");
         let file_path = directory_path.join("config.json");
@@ -32,15 +82,9 @@ impl Config {
             File::create(file_path)
                 .unwrap()
                 .write_all(
-                    &serde_json::to_string(&Self {
-                        audio_file_path: String::new(),
-                        volume: 1_f64,
-                        sample_interval: 15,
-                        level_of_detail: 10,
-                        bar_width: 5,
-                    })
-                    .unwrap()
-                    .as_bytes(),
+                    &serde_json::to_string_pretty(&Self::new())
+                        .unwrap()
+                        .as_bytes(),
                 )
                 .unwrap();
         }
@@ -55,7 +99,7 @@ impl Config {
             "config",
             "The path to the config file. Default: ~/.config/mvis/config.json.",
             "CONFIG",
-            Occur::Req,
+            Occur::Optional,
             Some(
                 home_dir()
                     .unwrap()
@@ -71,7 +115,7 @@ impl Config {
             "Sets the volume.",
             "VOLUME",
             Occur::Optional,
-            Some(String::from("1")),
+            None,
         );
         args.option(
             "f",
@@ -86,18 +130,16 @@ impl Config {
             "sample-interval",
             "The interval the sample thread should take from the buffer at each step in milliseconds. Default: 15.",
             "SAMPLE_INTERVAL",
-            Occur::Req,
-            Some(
-                String::from("15")
-            ),
+            Occur::Optional,
+            None,
         );
         args.option(
             "l",
             "level-of-detail",
             "The level between the steps in the sample for loop. Default: 10.",
             "LEVEL_OF_DETAIL",
-            Occur::Req,
-            Some(String::from("10")),
+            Occur::Optional,
+            None,
         );
         args.option(
             "b",
@@ -105,7 +147,7 @@ impl Config {
             "The width of the bars.",
             "BAR_WIDTH",
             Occur::Optional,
-            Some(String::from("5")),
+            None,
         );
 
         args.parse(env::args()).unwrap();
@@ -135,17 +177,13 @@ impl Config {
                     Box::new(OrderValidation::new(Order::LessThanOrEqual, 1_f64)),
                 ],
             )
-            .unwrap();
-        config.audio_file_path = args.value_of("file").unwrap();
+            .unwrap_or(config.volume);
         config.sample_interval = args
             .validated_value_of(
                 "sample-interval",
-                &[Box::new(OrderValidation::new(
-                    Order::GreaterThanOrEqual,
-                    1,
-                ))],
+                &[Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 1))],
             )
-            .unwrap();
+            .unwrap_or(config.sample_interval);
         config.level_of_detail = args
             .validated_value_of(
                 "level-of-detail",
@@ -154,7 +192,7 @@ impl Config {
                     Box::new(OrderValidation::new(Order::LessThanOrEqual, 1000)),
                 ],
             )
-            .unwrap();
+            .unwrap_or(config.level_of_detail);
         config.bar_width = args
             .validated_value_of(
                 "bar-width",
@@ -163,7 +201,7 @@ impl Config {
                     Box::new(OrderValidation::new(Order::LessThanOrEqual, 10)),
                 ],
             )
-            .unwrap();
+            .unwrap_or(config.bar_width);
 
         config
     }
