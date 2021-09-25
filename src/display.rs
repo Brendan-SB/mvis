@@ -21,9 +21,8 @@ impl<'a> Display<'a> {
         Self { config, terminal }
     }
 
-    fn calculate_offset(data_dist_len: f32, bar_width: f32, terminal_width: f32) -> usize {
+    fn calculate_offset(data_dist_len: f32, bar_width: f32, terminal_width: f32) -> f32 {
         ((data_dist_len + 1_f32 + bar_width * data_dist_len) / terminal_width).round()
-            as usize
     }
 
     fn group_bars(data: &[Complex<f32>], bar_width: f32, terminal_width: f32) -> Vec<(&str, u64)> {
@@ -36,15 +35,16 @@ impl<'a> Display<'a> {
                 .collect::<Vec<f32>>();
 
             let offset = Self::calculate_offset(data_dist.len() as f32, bar_width, terminal_width);
+            let offset_usize = offset as usize;
 
-            for i in (0..data_dist.len() - offset).step_by(offset) {
+            for i in (0..data_dist.len() - offset_usize).step_by(offset_usize) {
                 let mut sum = 0_f32;
 
-                for j in i..=i + offset {
+                for j in i..=i + offset_usize {
                     sum += data_dist[j];
                 }
 
-                data_dist_reformed.push(("", (sum / offset as f32).round() as u64));
+                data_dist_reformed.push(("", (sum / offset).round() as u64));
             }
         }
 
