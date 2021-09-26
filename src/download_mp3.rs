@@ -47,14 +47,13 @@ fn create_mp3_path(tmp_dir: &PathBuf, mp4_path: &String) -> String {
 
     mp4_path_split.pop();
 
-    let mut mp3_path = tmp_dir.clone().join(mp4_path_split.into_iter().collect::<String>());
+    let mut mp3_path = tmp_dir
+        .clone()
+        .join(mp4_path_split.into_iter().collect::<String>());
 
     mp3_path.set_extension("mp3");
-    
-    slugify!(mp3_path
-        .into_os_string()
-        .into_string()
-        .unwrap())
+
+    slugify!(mp3_path.into_os_string().into_string().unwrap())
 }
 
 pub fn download_mp3(tmp_dir: &PathBuf, url: &String) -> Result<String, std::io::Error> {
