@@ -95,6 +95,22 @@ impl Config {
 
         args.flag("h", "help", "Print the usage menu.");
         args.option(
+            "f",
+            "file",
+            "The path to the audio file.",
+            "FILE",
+            Occur::Optional,
+            None,
+        );
+        args.option(
+            "u",
+            "url",
+            "The url of a video you wish to download and play.",
+            "URL",
+            Occur::Optional,
+            None,
+        );
+        args.option(
             "c",
             "config",
             "The path to the config file. Default: ~/.config/mvis/config.json.",
@@ -114,14 +130,6 @@ impl Config {
             "volume",
             "Sets the volume.",
             "VOLUME",
-            Occur::Optional,
-            None,
-        );
-        args.option(
-            "f",
-            "file",
-            "The path to the audio file.",
-            "FILE",
             Occur::Optional,
             None,
         );

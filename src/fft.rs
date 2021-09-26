@@ -1,7 +1,7 @@
 use num_complex::Complex;
 use std::f32::consts::PI;
 
-pub fn fft(input: &[Complex<f32>]) -> Vec<Complex<f32>> {
+pub fn fft(buf_a: &mut Vec<Complex<f32>>) {
     fn fft_inner(buf_a: &mut [Complex<f32>], buf_b: &mut [Complex<f32>], n: usize, step: usize) {
         static I: Complex<f32> = Complex { re: 0.0, im: 1.0 };
 
@@ -21,8 +21,6 @@ pub fn fft(input: &[Complex<f32>]) -> Vec<Complex<f32>> {
         }
     }
 
-    let mut buf_a = input.to_vec();
-
     let n_orig = buf_a.len();
     let n = n_orig.next_power_of_two();
 
@@ -36,7 +34,5 @@ pub fn fft(input: &[Complex<f32>]) -> Vec<Complex<f32>> {
 
     let mut buf_b = buf_a.clone();
 
-    fft_inner(&mut buf_a, &mut buf_b, n, 1);
-
-    buf_a
+    fft_inner(buf_a, &mut buf_b, n, 1);
 }

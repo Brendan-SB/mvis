@@ -1,5 +1,4 @@
 use crate::{config::Config, display::Display, fft::fft};
-use args::Args;
 use kira::{
     instance::InstanceSettings,
     manager::{AudioManager, AudioManagerSettings},
@@ -12,9 +11,7 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-pub fn play(args: &Args, audio_file_path: &String) {
-    let config = Config::from_arguments(&args);
-
+pub fn play(config: &Config, audio_file_path: &String) {
     let mut audio_manager = AudioManager::new(AudioManagerSettings::default())
         .expect("Could not create audio manager. Make sure you have an audio device enabled.");
 
@@ -52,7 +49,9 @@ pub fn play(args: &Args, audio_file_path: &String) {
                 buffer.push(Complex::new((frame.right + frame.left) / 2_f32, 0_f32));
             }
 
-            display.update(&fft(&buffer));
+            fft(&mut buffer);
+
+            display.update(&buffer);
         }
 
         let remaining = sample_interval_f64_seconds - frame_timer.elapsed().unwrap().as_secs_f64();
