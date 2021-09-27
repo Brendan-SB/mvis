@@ -13,7 +13,7 @@ use std::{
 
 pub fn play(config: &Config, audio_file_path: &String) {
     let mut audio_manager = AudioManager::new(AudioManagerSettings::default())
-        .expect("Could not create audio manager. Make sure you have an audio device enabled.");
+        .expect("Could not create audio manager.");
 
     println!("Loading sound...");
 
