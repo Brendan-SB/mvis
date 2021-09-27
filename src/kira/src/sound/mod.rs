@@ -357,6 +357,16 @@ impl Sound {
         self.default_loop_start
     }
 
+    /// Returns the sample rate
+    pub fn sample_rate(&self) -> u32 {
+        self.sample_rate
+    }
+
+    /// Returns an immutable reference to the frames
+    pub fn frames(&self) -> &Vec<Frame> {
+        &self.frames
+    }
+
     /// Gets the frame of this sound at an arbitrary time
     /// in seconds, interpolating between samples if necessary.
     pub fn get_frame_at_position(&self, position: f64) -> Frame {

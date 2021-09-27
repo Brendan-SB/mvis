@@ -23,9 +23,8 @@ pub fn play(config: &Config, audio_file_path: &String) {
 
     let mut display = Display::new(&config);
 
-    let sound_handle_duration_millis_i64 = (sound_handle.duration() * 1000_f64) as i64;
     let sample_interval_f64_seconds = config.sample_interval as f64 / 1000_f64;
-    let offset = (config.sample_interval * config.level_of_detail) as i64;
+    let offset = (sound.sample_rate() as f32 * (config.sample_interval as f32 / 1000_f32)) as usize;
 
     let mut frame_timer = SystemTime::now();
 
@@ -39,20 +38,19 @@ pub fn play(config: &Config, audio_file_path: &String) {
         })
         .unwrap();
 
-    for i in (0..=sound_handle_duration_millis_i64).step_by(config.sample_interval) {
-        {
-            let mut buffer = Vec::new();
+    for i in (0..=sound.frames().len() - offset).step_by(offset) {
+        let mut buffer = Vec::new();
 
-            for j in i..=i + offset {
-                let frame = sound.get_frame_at_position(j as f64 / 1000_f64);
-
-                buffer.push(Complex::new((frame.right + frame.left) / 2_f32, 0_f32));
-            }
-
-            fft(&mut buffer);
-
-            display.update(&buffer);
+        for j in (i..=i + offset).step_by(config.level_of_detail) {
+            buffer.push(Complex {
+                re: (sound.frames()[j].left + sound.frames()[j].right) / 2_f32,
+                im: 0_f32,
+            });
         }
+
+        fft(&mut buffer);
+
+        display.update(&buffer);
 
         let remaining = sample_interval_f64_seconds - frame_timer.elapsed().unwrap().as_secs_f64();
 

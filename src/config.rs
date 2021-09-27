@@ -66,7 +66,7 @@ impl Config {
         Self {
             volume: 1_f64,
             sample_interval: 15,
-            level_of_detail: 10,
+            level_of_detail: 1,
             bar_width: 5,
             style: Style::new(),
         }
@@ -113,7 +113,7 @@ impl Config {
         args.option(
             "c",
             "config",
-            "The path to the config file. Default: ~/.config/mvis/config.json.",
+            "The path to the config file.",
             "CONFIG",
             Occur::Optional,
             Some(
@@ -136,7 +136,7 @@ impl Config {
         args.option(
             "s",
             "sample-interval",
-            "The interval the sample thread should take from the buffer at each step in milliseconds. Default: 15.",
+            "The interval the sample thread should take from the buffer at each step in milliseconds.",
             "SAMPLE_INTERVAL",
             Occur::Optional,
             None,
@@ -144,7 +144,7 @@ impl Config {
         args.option(
             "l",
             "level-of-detail",
-            "The level between the steps in the sample for loop. Default: 10.",
+            "The level between the steps in the sample for loop.",
             "LEVEL_OF_DETAIL",
             Occur::Optional,
             None,
@@ -177,39 +177,42 @@ impl Config {
     pub fn from_arguments(args: &Args) -> Self {
         let mut config = Self::from_config(args.value_of("config").unwrap());
 
-        config.volume = args
-            .validated_value_of(
-                "volume",
-                &[
-                    Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 0_f64)),
-                    Box::new(OrderValidation::new(Order::LessThanOrEqual, 1_f64)),
-                ],
-            )
-            .unwrap_or(config.volume);
-        config.sample_interval = args
-            .validated_value_of(
-                "sample-interval",
-                &[Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 1))],
-            )
-            .unwrap_or(config.sample_interval);
-        config.level_of_detail = args
-            .validated_value_of(
-                "level-of-detail",
-                &[
-                    Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 1)),
-                    Box::new(OrderValidation::new(Order::LessThanOrEqual, 1000)),
-                ],
-            )
-            .unwrap_or(config.level_of_detail);
-        config.bar_width = args
-            .validated_value_of(
-                "bar-width",
-                &[
-                    Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 1)),
-                    Box::new(OrderValidation::new(Order::LessThanOrEqual, 10)),
-                ],
-            )
-            .unwrap_or(config.bar_width);
+        if let Ok(volume) = args.validated_value_of(
+            "volume",
+            &[
+                Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 0_f64)),
+                Box::new(OrderValidation::new(Order::LessThanOrEqual, 1_f64)),
+            ],
+        ) {
+            config.volume = volume;
+        }
+
+        if let Ok(sample_interval) = args.validated_value_of(
+            "sample-interval",
+            &[Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 1))],
+        ) {
+            config.sample_interval = sample_interval;
+        }
+
+        if let Ok(level_of_detail) = args.validated_value_of(
+            "level-of-detail",
+            &[
+                Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 1)),
+                Box::new(OrderValidation::new(Order::LessThanOrEqual, 1000)),
+            ],
+        ) {
+            config.level_of_detail = level_of_detail;
+        }
+
+        if let Ok(bar_width) = args.validated_value_of(
+            "bar-width",
+            &[
+                Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 1)),
+                Box::new(OrderValidation::new(Order::LessThanOrEqual, 10)),
+            ],
+        ) {
+            config.bar_width = bar_width;
+        }
 
         config
     }
