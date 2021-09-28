@@ -26,8 +26,6 @@ pub fn play(config: &Config, audio_file_path: &String) {
     let sample_interval_f64_seconds = config.sample_interval as f64 / 1000_f64;
     let offset = (sound.sample_rate() as f32 * (config.sample_interval as f32 / 1000_f32)) as usize;
 
-    let mut frame_timer = SystemTime::now();
-
     sound_handle
         .play({
             let mut instance_settings = InstanceSettings::default();
@@ -38,6 +36,8 @@ pub fn play(config: &Config, audio_file_path: &String) {
         })
         .unwrap();
 
+    let mut frame_timer = SystemTime::now();
+    
     for i in (0..=sound.frames().len() - offset).step_by(offset) {
         let mut buffer = Vec::new();
 
