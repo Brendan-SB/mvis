@@ -25,6 +25,11 @@ pub fn play(config: &Config, audio_file_path: &String) {
 
     let sample_interval_f64_seconds = config.sample_interval as f64 / 1000_f64;
     let offset = (sound.sample_rate() as f32 * (config.sample_interval as f32 / 1000_f32)) as usize;
+<<<<<<< HEAD
+=======
+    
+    let mut frame_timer_offset = 0_f64;
+>>>>>>> 3004831f27773786d32a75552cb9b51b0bef9e87
 
     sound_handle
         .play({
@@ -39,23 +44,29 @@ pub fn play(config: &Config, audio_file_path: &String) {
     let mut frame_timer = SystemTime::now();
     
     for i in (0..=sound.frames().len() - offset).step_by(offset) {
-        let mut buffer = Vec::new();
+        {
+            let mut buffer = Vec::new();
 
-        for j in (i..=i + offset).step_by(config.level_of_detail) {
-            buffer.push(Complex {
-                re: (sound.frames()[j].left + sound.frames()[j].right) / 2_f32,
-                im: 0_f32,
-            });
+            for j in (i..=i + offset).step_by(config.level_of_detail) {
+                buffer.push(Complex {
+                    re: (sound.frames()[j].left + sound.frames()[j].right) / 2_f32,
+                    im: 0_f32,
+                });
+            }
+
+            fft(&mut buffer);
+
+            display.update(&buffer);
         }
 
-        fft(&mut buffer);
-
-        display.update(&buffer);
-
-        let remaining = sample_interval_f64_seconds - frame_timer.elapsed().unwrap().as_secs_f64();
+        let remaining = sample_interval_f64_seconds - frame_timer.elapsed().unwrap().as_secs_f64() + frame_timer_offset;
 
         if remaining > 0_f64 {
+            frame_timer_offset = 0_f64;
+            
             sleep(Duration::from_secs_f64(remaining));
+        } else {
+            frame_timer_offset = remaining;
         }
 
         frame_timer = SystemTime::now();
