@@ -38,7 +38,9 @@ pub fn play(config: &Config, audio_file_path: &String) {
         })
         .unwrap();
 
-    for i in (0..=sound.frames().len() - offset).step_by(offset) {
+    let mut i = 0;
+
+    while i < sound.frames().len() {
         let mut buffer = Vec::new();
 
         for j in (i..=i + offset).step_by(config.level_of_detail) {
@@ -56,6 +58,10 @@ pub fn play(config: &Config, audio_file_path: &String) {
 
         if remaining > 0_f64 {
             sleep(Duration::from_secs_f64(remaining));
+
+            i += offset;
+        } else {
+            i += offset * (-remaining.round() as usize + 1);
         }
 
         frame_timer = SystemTime::now();
