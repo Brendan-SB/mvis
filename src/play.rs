@@ -25,11 +25,8 @@ pub fn play(config: &Config, audio_file_path: &String) {
 
     let sample_interval_f64_seconds = config.sample_interval as f64 / 1000_f64;
     let offset = (sound.sample_rate() as f32 * (config.sample_interval as f32 / 1000_f32)) as usize;
-<<<<<<< HEAD
-=======
     
     let mut frame_timer_offset = 0_f64;
->>>>>>> 3004831f27773786d32a75552cb9b51b0bef9e87
 
     sound_handle
         .play({

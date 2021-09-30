@@ -66,7 +66,7 @@ impl Config {
         Self {
             volume: 1_f64,
             sample_interval: 15,
-            level_of_detail: 10,
+            level_of_detail: 1,
             bar_width: 5,
             style: Style::new(),
         }

@@ -31,7 +31,7 @@ impl<'a> Display<'a> {
         ((data_dist_len + 1_f32 + bar_width * data_dist_len) / terminal_width).round()
     }
 
-    fn group_bars(data: &[Complex<f32>], bar_width: f32, terminal_width: f32) -> Vec<(&str, u64)> {
+    fn create_bars(data: &[Complex<f32>], bar_width: f32, terminal_width: f32) -> Vec<(&str, u64)> {
         let mut data_dist_reformed = Vec::new();
 
         {
@@ -64,7 +64,7 @@ impl<'a> Display<'a> {
 
         self.terminal
             .draw(move |f| {
-                let data_dist = Self::group_bars(data, bar_width as f32, terminal_width as f32);
+                let data_dist = Self::create_bars(data, bar_width as f32, terminal_width as f32);
 
                 let bar_chart = BarChart::default()
                     .block(Block::default().title(PROGRAM_NAME).borders(Borders::ALL))
