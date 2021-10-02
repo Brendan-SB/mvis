@@ -17,6 +17,7 @@ fn main() {
     let tmp_dir_path = home_dir().unwrap().join(".local/share/mvis/tmp");
 
     fs::create_dir_all(&tmp_dir_path).unwrap();
+
     clean_tmp_dir(&tmp_dir_path).unwrap();
 
     Config::try_create_default_config_file();
@@ -25,6 +26,12 @@ fn main() {
 
     if args.value_of("help").unwrap() {
         println!("{}", args.full_usage());
+
+        return;
+    }
+
+    if args.value_of("regenerate-config").unwrap() {
+        Config::print_default_config();
 
         return;
     }

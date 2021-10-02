@@ -39,7 +39,11 @@ impl Style {
     fn decode_style_value(hex: &Option<String>) -> Option<Color> {
         match hex {
             Some(v) => {
-                let decoded = hex::decode(v).unwrap();
+                if v.chars().next().expect("Hex value length is 0.") != '#' {
+                    panic!("Invalid hex value.");
+                }
+
+                let decoded = hex::decode(&v[1..7]).unwrap();
 
                 Some(Color::Rgb {
                     0: decoded[0],
@@ -67,9 +71,17 @@ impl Config {
             volume: 1_f64,
             sample_interval: 15,
             level_of_detail: 1,
-            bar_width: 5,
+            bar_width: 1,
             style: Style::new(),
         }
+    }
+
+    fn generate_default_config_pretty() -> String {
+        serde_json::to_string_pretty(&Self::new()).unwrap()
+    }
+
+    pub fn print_default_config() {
+        println!("{}", Self::generate_default_config_pretty());
     }
 
     pub fn try_create_default_config_file() {
@@ -81,11 +93,7 @@ impl Config {
 
             File::create(file_path)
                 .unwrap()
-                .write_all(
-                    &serde_json::to_string_pretty(&Self::new())
-                        .unwrap()
-                        .as_bytes(),
-                )
+                .write_all(&Self::generate_default_config_pretty().as_bytes())
                 .unwrap();
         }
     }
@@ -94,6 +102,11 @@ impl Config {
         let mut args = Args::new(PROGRAM_NAME, PROGRAM_DESC);
 
         args.flag("h", "help", "Print the usage menu.");
+        args.flag(
+            "r",
+            "regenerate-config",
+            "Print the default config to standard output.",
+        );
         args.option(
             "f",
             "file",

@@ -1,4 +1,4 @@
-use std::{fs, fs::DirEntry, path::PathBuf, process::Command};
+use std::{fs, fs::DirEntry, io, io::Write, path::PathBuf, process::Command};
 
 fn create_youtube_dl_command(output_path: &String, url: &String) -> Command {
     let mut command = Command::new("youtube-dl");
@@ -57,7 +57,9 @@ fn create_mp3_path(tmp_dir: &PathBuf, mp4_path: &String) -> String {
 }
 
 pub fn download_mp3(tmp_dir: &PathBuf, url: &String) -> Result<String, std::io::Error> {
-    println!("Downloading...");
+    print!("Downloading... ");
+
+    io::stdout().flush().unwrap();
 
     {
         let mut cmd = create_youtube_dl_command(
@@ -72,8 +74,10 @@ pub fn download_mp3(tmp_dir: &PathBuf, url: &String) -> Result<String, std::io::
         cmd.output().expect("Failed to download link.");
     }
 
-    println!("Download complete.");
-    println!("Converting...");
+    println!("Complete.");
+    print!("Converting... ");
+
+    io::stdout().flush().unwrap();
 
     let mp4_path = fs::read_dir(&tmp_dir)
         .unwrap()
@@ -94,7 +98,7 @@ pub fn download_mp3(tmp_dir: &PathBuf, url: &String) -> Result<String, std::io::
 
     fs::remove_file(&mp4_path).unwrap();
 
-    println!("Conversion complete.");
+    println!("Complete.");
 
     Ok(mp3_path)
 }
