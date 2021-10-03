@@ -46,7 +46,7 @@ pub fn play(config: &Config, audio_file_path: &String) {
 
     let mut frame_timer = SystemTime::now();
 
-    for i in (0..=sound.frames().len() - offset).step_by(offset) {
+    for i in (0..sound.frames().len() - offset).step_by(offset) {
         {
             let mut buffer = Vec::new();
 
