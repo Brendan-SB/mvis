@@ -39,7 +39,7 @@ impl Style {
     fn decode_style_value(hex: &Option<String>) -> Option<Color> {
         match hex {
             Some(v) => {
-                if v.chars().next().expect("Hex value length is 0.") != '#' {
+                if v.len() != 7 || v.chars().next().unwrap() != '#' {
                     panic!("Invalid hex value.");
                 }
 
