@@ -66,7 +66,9 @@ pub fn play(config: &Config, audio_file_path: &String) {
             + frame_timer_offset;
 
         if remaining > 0_f32 {
-            frame_timer_offset = 0_f32;
+            if frame_timer_offset != 0_f32 {
+                frame_timer_offset = 0_f32;
+            }
 
             sleep(Duration::from_secs_f32(remaining));
         } else {
