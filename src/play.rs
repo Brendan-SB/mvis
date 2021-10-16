@@ -63,7 +63,8 @@ pub fn play(config: &Config, audio_file_path: &String) {
         }
 
         {
-            let remaining = sample_interval_f32_seconds - frame_timer.elapsed().unwrap().as_secs_f32()
+            let remaining = sample_interval_f32_seconds
+                - frame_timer.elapsed().unwrap().as_secs_f32()
                 + frame_timer_offset;
 
             if remaining > 0_f32 {
