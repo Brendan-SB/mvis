@@ -62,17 +62,19 @@ pub fn play(config: &Config, audio_file_path: &String) {
             display.update(&buffer);
         }
 
-        let remaining = sample_interval_f32_seconds - frame_timer.elapsed().unwrap().as_secs_f32()
-            + frame_timer_offset;
+        {
+            let remaining = sample_interval_f32_seconds - frame_timer.elapsed().unwrap().as_secs_f32()
+                + frame_timer_offset;
 
-        if remaining > 0_f32 {
-            if frame_timer_offset != 0_f32 {
-                frame_timer_offset = 0_f32;
+            if remaining > 0_f32 {
+                if frame_timer_offset != 0_f32 {
+                    frame_timer_offset = 0_f32;
+                }
+
+                sleep(Duration::from_secs_f32(remaining));
+            } else {
+                frame_timer_offset = remaining;
             }
-
-            sleep(Duration::from_secs_f32(remaining));
-        } else {
-            frame_timer_offset = remaining;
         }
 
         frame_timer = SystemTime::now();
