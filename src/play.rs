@@ -29,10 +29,10 @@ pub fn play(config: &Config, audio_file_path: &String) {
 
     let mut display = Display::new(&config);
 
-    let sample_interval_f64_seconds = config.sample_interval as f64 / 1000_f64;
+    let sample_interval_f32_seconds = config.sample_interval as f32 / 1000_f32;
     let offset = (sound.sample_rate() as f32 * (config.sample_interval as f32 / 1000_f32)) as usize;
 
-    let mut frame_timer_offset = 0_f64;
+    let mut frame_timer_offset = 0_f32;
 
     sound_handle
         .play({
@@ -62,13 +62,13 @@ pub fn play(config: &Config, audio_file_path: &String) {
             display.update(&buffer);
         }
 
-        let remaining = sample_interval_f64_seconds - frame_timer.elapsed().unwrap().as_secs_f64()
+        let remaining = sample_interval_f32_seconds - frame_timer.elapsed().unwrap().as_secs_f32()
             + frame_timer_offset;
 
-        if remaining > 0_f64 {
-            frame_timer_offset = 0_f64;
+        if remaining > 0_f32 {
+            frame_timer_offset = 0_f32;
 
-            sleep(Duration::from_secs_f64(remaining));
+            sleep(Duration::from_secs_f32(remaining));
         } else {
             frame_timer_offset = remaining;
         }
