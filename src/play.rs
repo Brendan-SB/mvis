@@ -34,6 +34,8 @@ pub fn play(config: &Config, audio_file_path: &String) {
 
     let mut frame_timer_offset = 0_f32;
 
+    let frames = sound.frames();
+    
     sound_handle
         .play({
             let mut instance_settings = InstanceSettings::default();
@@ -46,13 +48,13 @@ pub fn play(config: &Config, audio_file_path: &String) {
 
     let mut frame_timer = SystemTime::now();
 
-    for i in (0..sound.frames().len() - offset).step_by(offset) {
+    for i in (0..frames.len() - offset).step_by(offset) {
         {
             let mut buffer = Vec::new();
 
             for j in (i..=i + offset).step_by(config.level_of_detail) {
                 buffer.push(Complex {
-                    re: (sound.frames()[j].left + sound.frames()[j].right) / 2_f32,
+                    re: (frames[j].left + frames[j].right) / 2_f32,
                     im: 0_f32,
                 });
             }
