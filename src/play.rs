@@ -35,7 +35,7 @@ pub fn play(config: &Config, audio_file_path: &String) {
     let mut frame_timer_offset = 0_f32;
 
     let frames = sound.frames();
-    
+
     sound_handle
         .play({
             let mut instance_settings = InstanceSettings::default();
