@@ -72,7 +72,7 @@ impl Config {
         Self {
             volume: 1_f64,
             sample_interval: 15,
-            detail: 1.0,
+            detail: 0.1,
             fps: 60,
             bar_width: 1,
             style: Style::new(),
