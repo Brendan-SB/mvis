@@ -26,7 +26,6 @@ pub struct Style {
 #[derive(Serialize, Deserialize)]
 pub struct Config {
     pub volume: f64,
-    pub sample_interval: usize,
     pub detail: f32,
     pub fps: usize,
     pub bar_width: u16,
@@ -71,7 +70,6 @@ impl Config {
     fn new() -> Self {
         Self {
             volume: 1_f64,
-            sample_interval: 15,
             detail: 0.1,
             fps: 60,
             bar_width: 1,
@@ -192,13 +190,6 @@ impl Config {
             ],
         ) {
             config.volume = volume;
-        }
-
-        if let Ok(sample_interval) = args.validated_value_of(
-            "sample-interval",
-            &[Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 1))],
-        ) {
-            config.sample_interval = sample_interval;
         }
 
         if let Ok(detail) = args.validated_value_of(
