@@ -26,7 +26,7 @@ pub struct Style {
 pub struct Config {
     pub volume: f64,
     pub sample_interval: usize,
-    pub level_of_detail: usize,
+    pub detail: f32,
     pub bar_width: u16,
     pub style: Style,
 }
@@ -70,7 +70,7 @@ impl Config {
         Self {
             volume: 1_f64,
             sample_interval: 15,
-            level_of_detail: 1,
+            detail: 1.0,
             bar_width: 1,
             style: Style::new(),
         }
@@ -207,14 +207,14 @@ impl Config {
             config.sample_interval = sample_interval;
         }
 
-        if let Ok(level_of_detail) = args.validated_value_of(
-            "level-of-detail",
+        if let Ok(detail) = args.validated_value_of(
+            "detail",
             &[
-                Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 1)),
-                Box::new(OrderValidation::new(Order::LessThanOrEqual, 1000)),
+                Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 0.0_f32)),
+                Box::new(OrderValidation::new(Order::LessThanOrEqual, 1_f32)),
             ],
         ) {
-            config.level_of_detail = level_of_detail;
+            config.detail = detail;
         }
 
         if let Ok(bar_width) = args.validated_value_of(

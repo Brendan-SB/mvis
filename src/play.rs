@@ -1,85 +1,47 @@
 use crate::{config::Config, display::Display, fft::fft};
 use kira::{
-    instance::InstanceSettings,
-    manager::{AudioManager, AudioManagerSettings},
-    sound::{Sound, SoundSettings},
-    Value,
+    manager::{backend::cpal::CpalBackend, AudioManager, AudioManagerSettings},
+    sound::static_sound::{PlaybackState, StaticSoundData},
 };
 use num_complex::Complex;
-use std::{
-    io,
-    io::Write,
-    thread::sleep,
-    time::{Duration, SystemTime},
-};
+use std::{io, io::Write, thread, time::Duration};
 
 pub fn play(config: &Config, audio_file_path: &String) {
-    let mut audio_manager = AudioManager::new(AudioManagerSettings::default())
+    let mut manager = AudioManager::<CpalBackend>::new(AudioManagerSettings::default())
         .expect("Could not create audio manager.");
 
     print!("Loading sound...");
 
     io::stdout().flush().unwrap();
 
-    let sound =
-        Sound::from_file(&audio_file_path, SoundSettings::default()).expect("Failed to load file.");
-    let mut sound_handle = audio_manager.add_sound(sound.clone()).unwrap();
+    let sound = StaticSoundData::from_file(&audio_file_path, Default::default())
+        .expect("Failed to load file.");
 
     println!("Complete.");
 
     let mut display = Display::new(&config);
+    let handle = manager.play(sound.clone()).unwrap();
 
-    let sample_interval_f32_seconds = config.sample_interval as f32 / 1000_f32;
-    let offset = (sound.sample_rate() as f32 * (config.sample_interval as f32 / 1000_f32)) as usize;
+    while handle.state() != PlaybackState::Stopped {
+        let index = (handle.position() * sound.sample_rate as f64).round() as usize;
+        let mut buffer = Vec::new();
 
-    let mut frame_timer_offset = 0_f32;
-
-    let frames = sound.frames();
-
-    sound_handle
-        .play({
-            let mut instance_settings = InstanceSettings::default();
-
-            instance_settings.volume = Value::from(config.volume);
-
-            instance_settings
-        })
-        .unwrap();
-
-    let mut frame_timer = SystemTime::now();
-
-    for i in (0..frames.len() - offset).step_by(offset) {
+        for i in (index % sound.frames.len())
+            ..((index as f32 + sound.sample_rate as f32 * config.detail).round() as usize
+                % sound.frames.len())
         {
-            let mut buffer = Vec::new();
+            let frame = sound.frames[i];
 
-            for j in (i..=i + offset).step_by(config.level_of_detail) {
-                buffer.push(Complex {
-                    re: (frames[j].left + frames[j].right) / 2_f32,
-                    im: 0_f32,
-                });
-            }
-
-            fft(&mut buffer);
-
-            display.update(&buffer);
+            buffer.push(Complex {
+                re: (frame.left + frame.right) / 2_f32,
+                im: 0_f32,
+            });
         }
 
-        {
-            let remaining = sample_interval_f32_seconds
-                - frame_timer.elapsed().unwrap().as_secs_f32()
-                + frame_timer_offset;
+        fft(&mut buffer);
 
-            if remaining > 0_f32 {
-                if frame_timer_offset != 0_f32 {
-                    frame_timer_offset = 0_f32;
-                }
+        display.update(&buffer);
 
-                sleep(Duration::from_secs_f32(remaining));
-            } else {
-                frame_timer_offset = remaining;
-            }
-        }
-
-        frame_timer = SystemTime::now();
+        thread::sleep(Duration::from_secs_f32(1_f32 / sound.sample_rate as f32));
     }
 }
