@@ -1,4 +1,3 @@
-mod clean_tmp_dir;
 mod config;
 mod display;
 mod fft;
