@@ -11,7 +11,6 @@ pub const PROGRAM_DESC: &str = "A command line music visualizer.";
 pub const NO_HOME: &str = "No home folder";
 pub const IMPROPER_HEX_FORMAT: &str = "Improper hex format";
 pub const FROM_OS_STRING_FAILED: &str = "Failed to change OsString to String";
-pub const NO_TERMINAL_WIDTH: &str = "Failed to change OsString to String";
 
 fn main() {
     if let Err(e) = run() {

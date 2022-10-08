@@ -27,14 +27,18 @@ pub fn play(config: &Config, audio_file_path: &String) -> anyhow::Result<()> {
 
     while handle.state() != PlaybackState::Stopped {
         let frame_start = Instant::now();
-
         let index = (handle.position() * sound.sample_rate as f64).round() as usize;
+        let start = index as usize % sound.frames.len();
+        let end = (index as f32 + sound.sample_rate as f32 * config.detail).round() as usize
+            % sound.frames.len();
+
+        if (end as i32 - start as i32) <= 0 {
+            break;
+        }
+
         let mut buffer = Vec::new();
 
-        for i in (index % sound.frames.len())
-            ..((index as f32 + sound.sample_rate as f32 * config.detail).round() as usize
-                % sound.frames.len())
-        {
+        for i in start..end {
             let frame = sound.frames[i];
 
             buffer.push(Complex {
@@ -48,7 +52,6 @@ pub fn play(config: &Config, audio_file_path: &String) -> anyhow::Result<()> {
         display.update(&buffer)?;
 
         let frame_end = Instant::now();
-
         let time = frame_end.duration_since(frame_start);
         let fps = 1.0 / time.as_secs_f32();
 
