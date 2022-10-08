@@ -4,25 +4,30 @@ use kira::{
     sound::static_sound::{PlaybackState, StaticSoundData},
 };
 use num_complex::Complex;
-use std::{io, io::Write, thread, time::Duration};
+use std::{
+    io,
+    io::Write,
+    thread,
+    time::{Duration, Instant},
+};
 
-pub fn play(config: &Config, audio_file_path: &String) {
-    let mut manager = AudioManager::<CpalBackend>::new(AudioManagerSettings::default())
-        .expect("Could not create audio manager.");
+pub fn play(config: &Config, audio_file_path: &String) -> anyhow::Result<()> {
+    let mut manager = AudioManager::<CpalBackend>::new(AudioManagerSettings::default())?;
 
     print!("Loading sound...");
 
-    io::stdout().flush().unwrap();
+    io::stdout().flush()?;
 
-    let sound = StaticSoundData::from_file(&audio_file_path, Default::default())
-        .expect("Failed to load file.");
+    let sound = StaticSoundData::from_file(&audio_file_path, Default::default())?;
 
     println!("Complete.");
 
-    let mut display = Display::new(&config);
-    let handle = manager.play(sound.clone()).unwrap();
+    let mut display = Display::new(&config)?;
+    let handle = manager.play(sound.clone())?;
 
     while handle.state() != PlaybackState::Stopped {
+        let frame_start = Instant::now();
+
         let index = (handle.position() * sound.sample_rate as f64).round() as usize;
         let mut buffer = Vec::new();
 
@@ -40,8 +45,17 @@ pub fn play(config: &Config, audio_file_path: &String) {
 
         fft(&mut buffer);
 
-        display.update(&buffer);
+        display.update(&buffer)?;
 
-        thread::sleep(Duration::from_secs_f32(1_f32 / sound.sample_rate as f32));
+        let frame_end = Instant::now();
+
+        let time = frame_end.duration_since(frame_start);
+        let fps = 1.0 / time.as_secs_f32();
+
+        if fps > config.fps as f32 {
+            thread::sleep(Duration::from_secs_f32(1.0 / (fps - config.fps as f32)));
+        }
     }
+
+    Ok(())
 }

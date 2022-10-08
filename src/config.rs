@@ -1,4 +1,5 @@
-use crate::consts::{PROGRAM_DESC, PROGRAM_NAME};
+use crate::{FROM_OS_STRING_FAILED, IMPROPER_HEX_FORMAT, NO_HOME, PROGRAM_DESC, PROGRAM_NAME};
+use anyhow::Context;
 use args::{
     validations::{Order, OrderValidation},
     Args,
@@ -27,6 +28,7 @@ pub struct Config {
     pub volume: f64,
     pub sample_interval: usize,
     pub detail: f32,
+    pub fps: usize,
     pub bar_width: u16,
     pub style: Style,
 }
@@ -36,32 +38,32 @@ impl Style {
         Self { fg: None, bg: None }
     }
 
-    fn decode_style_value(hex: &Option<String>) -> Option<Color> {
+    fn decode_style_value(hex: &Option<String>) -> anyhow::Result<Option<Color>> {
         match hex {
             Some(v) => {
-                if v.len() != 7 || v.chars().next().unwrap() != '#' {
-                    panic!("Invalid hex value.");
+                if v.len() != 7 || v.chars().next() != Some('#') {
+                    return Err(anyhow::Error::msg(IMPROPER_HEX_FORMAT));
                 }
 
-                let decoded = hex::decode(&v[1..7]).unwrap();
+                let decoded = hex::decode(&v[1..7])?;
 
-                Some(Color::Rgb {
+                Ok(Some(Color::Rgb {
                     0: decoded[0],
                     1: decoded[1],
                     2: decoded[2],
-                })
+                }))
             }
-            None => None,
+            None => Ok(None),
         }
     }
 
-    pub fn to_tui_style(&self) -> style::Style {
-        style::Style {
-            fg: Self::decode_style_value(&self.fg),
-            bg: Self::decode_style_value(&self.bg),
+    pub fn to_tui_style(&self) -> anyhow::Result<style::Style> {
+        Ok(style::Style {
+            fg: Self::decode_style_value(&self.fg)?,
+            bg: Self::decode_style_value(&self.bg)?,
             add_modifier: Modifier::empty(),
             sub_modifier: Modifier::empty(),
-        }
+        })
     }
 }
 
@@ -71,34 +73,37 @@ impl Config {
             volume: 1_f64,
             sample_interval: 15,
             detail: 1.0,
+            fps: 60,
             bar_width: 1,
             style: Style::new(),
         }
     }
 
-    fn generate_default_config_pretty() -> String {
-        serde_json::to_string_pretty(&Self::new()).unwrap()
+    fn generate_default_config_pretty() -> anyhow::Result<String> {
+        Ok(serde_json::to_string_pretty(&Self::new())?)
     }
 
-    pub fn print_default_config() {
-        println!("{}", Self::generate_default_config_pretty());
+    pub fn print_default_config() -> anyhow::Result<()> {
+        println!("{}", Self::generate_default_config_pretty()?);
+
+        Ok(())
     }
 
-    pub fn try_create_default_config_file() {
-        let directory_path = home_dir().unwrap().join(".config/mvis");
+    pub fn try_create_default_config_file() -> anyhow::Result<()> {
+        let directory_path = home_dir().context(NO_HOME)?.join(".config/mvis");
         let file_path = directory_path.join("config.json");
 
         if !file_path.exists() {
-            create_dir_all(directory_path).unwrap();
+            create_dir_all(directory_path)?;
 
-            File::create(file_path)
-                .unwrap()
-                .write_all(&Self::generate_default_config_pretty().as_bytes())
-                .unwrap();
+            File::create(file_path)?
+                .write_all(&Self::generate_default_config_pretty()?.as_bytes())?
         }
+
+        Ok(())
     }
 
-    pub fn create_args() -> Args {
+    pub fn create_args() -> anyhow::Result<Args> {
         let mut args = Args::new(PROGRAM_NAME, PROGRAM_DESC);
 
         args.flag("h", "help", "Print the usage menu.");
@@ -116,14 +121,6 @@ impl Config {
             None,
         );
         args.option(
-            "u",
-            "url",
-            "The url of a video you wish to download and play.",
-            "URL",
-            Occur::Optional,
-            None,
-        );
-        args.option(
             "c",
             "config",
             "The path to the config file.",
@@ -131,11 +128,11 @@ impl Config {
             Occur::Optional,
             Some(
                 home_dir()
-                    .unwrap()
+                    .context(NO_HOME)?
                     .join(".config/mvis/config.json")
                     .into_os_string()
                     .into_string()
-                    .unwrap(),
+                    .map_err(|_| anyhow::Error::msg(FROM_OS_STRING_FAILED))?,
             ),
         );
         args.option(
@@ -171,24 +168,21 @@ impl Config {
             None,
         );
 
-        args.parse(env::args()).unwrap();
+        args.parse(env::args())?;
 
-        args
+        Ok(args)
     }
 
-    fn from_config(path: String) -> Self {
+    fn from_config(path: String) -> anyhow::Result<Self> {
         let mut contents = String::new();
 
-        File::open(&path)
-            .unwrap()
-            .read_to_string(&mut contents)
-            .unwrap();
+        File::open(&path)?.read_to_string(&mut contents)?;
 
-        serde_json::from_str(contents.as_str()).unwrap()
+        Ok(serde_json::from_str(contents.as_str())?)
     }
 
-    pub fn from_arguments(args: &Args) -> Self {
-        let mut config = Self::from_config(args.value_of("config").unwrap());
+    pub fn from_arguments(args: &Args) -> anyhow::Result<Self> {
+        let mut config = Self::from_config(args.value_of("config")?)?;
 
         if let Ok(volume) = args.validated_value_of(
             "volume",
@@ -217,6 +211,13 @@ impl Config {
             config.detail = detail;
         }
 
+        if let Ok(fps) = args.validated_value_of(
+            "fps",
+            &[Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 0))],
+        ) {
+            config.fps = fps;
+        }
+
         if let Ok(bar_width) = args.validated_value_of(
             "bar-width",
             &[
@@ -227,6 +228,6 @@ impl Config {
             config.bar_width = bar_width;
         }
 
-        config
+        Ok(config)
     }
 }

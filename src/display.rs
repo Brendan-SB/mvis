@@ -1,4 +1,4 @@
-use crate::{config::Config, consts::PROGRAM_NAME};
+use crate::{config::Config, PROGRAM_NAME};
 use num_complex::Complex;
 use std::io::{stdout, Stdout};
 use tui::{
@@ -15,16 +15,16 @@ pub struct Display<'a> {
 }
 
 impl<'a> Display<'a> {
-    pub fn new(config: &'a Config) -> Self {
-        let mut terminal = Terminal::new(TermionBackend::new(stdout())).unwrap();
+    pub fn new(config: &'a Config) -> anyhow::Result<Self> {
+        let mut terminal = Terminal::new(TermionBackend::new(stdout()))?;
 
-        terminal.clear().unwrap();
+        terminal.clear()?;
 
-        Self {
+        Ok(Self {
             config,
             terminal,
-            bar_style: config.style.to_tui_style(),
-        }
+            bar_style: config.style.to_tui_style()?,
+        })
     }
 
     fn calculate_offset(data_dist_len: f32, bar_width: f32, terminal_width: f32) -> f32 {
@@ -60,23 +60,23 @@ impl<'a> Display<'a> {
         data_dist_reformed
     }
 
-    pub fn update(&mut self, data: &[Complex<f32>]) {
+    pub fn update(&mut self, data: &[Complex<f32>]) -> anyhow::Result<()> {
         let bar_width = self.config.bar_width;
-        let terminal_width = self.terminal.size().unwrap().width;
+        let terminal_width = self.terminal.size()?.width;
         let bar_style = self.bar_style.clone();
 
-        self.terminal
-            .draw(move |f| {
-                let data_dist = Self::create_bars(data, bar_width as f32, terminal_width as f32);
+        self.terminal.draw(move |f| {
+            let data_dist = Self::create_bars(data, bar_width as f32, terminal_width as f32);
 
-                let bar_chart = BarChart::default()
-                    .block(Block::default().title(PROGRAM_NAME).borders(Borders::ALL))
-                    .bar_width(bar_width)
-                    .style(bar_style)
-                    .data(&data_dist);
+            let bar_chart = BarChart::default()
+                .block(Block::default().title(PROGRAM_NAME).borders(Borders::ALL))
+                .bar_width(bar_width)
+                .style(bar_style)
+                .data(&data_dist);
 
-                f.render_widget(bar_chart, f.size());
-            })
-            .unwrap();
+            f.render_widget(bar_chart, f.size());
+        })?;
+
+        Ok(())
     }
 }
