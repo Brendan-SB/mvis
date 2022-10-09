@@ -27,7 +27,7 @@ pub struct Style {
 pub struct Config {
     pub volume: f64,
     pub detail: f64,
-    pub fps: usize,
+    pub fps: Option<usize>,
     pub bar_width: u16,
     pub style: Style,
 }
@@ -71,7 +71,7 @@ impl Config {
         Self {
             volume: 1_f64,
             detail: 0.1,
-            fps: 60,
+            fps: None,
             bar_width: 1,
             style: Style::new(),
         }
@@ -206,7 +206,7 @@ impl Config {
             "fps",
             &[Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 0))],
         ) {
-            config.fps = fps;
+            config.fps = Some(fps);
         }
 
         if let Ok(bar_width) = args.validated_value_of(

@@ -51,12 +51,14 @@ pub fn play(config: &Config, audio_file_path: &String) -> anyhow::Result<()> {
 
         display.update(&buffer)?;
 
-        let frame_end = Instant::now();
-        let time = frame_end.duration_since(frame_start);
-        let fps = 1.0 / time.as_secs_f64();
+        if let Some(target_fps) = config.fps {
+            let frame_end = Instant::now();
+            let time = frame_end.duration_since(frame_start);
+            let fps = 1.0 / time.as_secs_f64();
 
-        if fps > config.fps as f64 {
-            thread::sleep(Duration::from_secs_f64(1.0 / (fps - config.fps as f64)));
+            if fps > target_fps as f64 {
+                thread::sleep(Duration::from_secs_f64(1.0 / (fps - target_fps as f64)));
+            }
         }
     }
 
