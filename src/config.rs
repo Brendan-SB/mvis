@@ -26,7 +26,7 @@ pub struct Style {
 #[derive(Serialize, Deserialize)]
 pub struct Config {
     pub volume: f64,
-    pub detail: f32,
+    pub detail: f64,
     pub fps: usize,
     pub bar_width: u16,
     pub style: Style,
@@ -195,8 +195,8 @@ impl Config {
         if let Ok(detail) = args.validated_value_of(
             "detail",
             &[
-                Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 0.0_f32)),
-                Box::new(OrderValidation::new(Order::LessThanOrEqual, 1_f32)),
+                Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 0_f64)),
+                Box::new(OrderValidation::new(Order::LessThanOrEqual, 1_f64)),
             ],
         ) {
             config.detail = detail;

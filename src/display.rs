@@ -27,27 +27,27 @@ impl<'a> Display<'a> {
         })
     }
 
-    fn calculate_offset(data_dist_len: f32, bar_width: f32, terminal_width: f32) -> f32 {
-        if terminal_width > bar_width && terminal_width > 0_f32 {
-            ((1_f32 + data_dist_len + bar_width * data_dist_len) / terminal_width).round()
+    fn calculate_offset(data_dist_len: f64, bar_width: f64, terminal_width: f64) -> f64 {
+        if terminal_width > bar_width && terminal_width > 0_f64 {
+            ((1_f64 + data_dist_len + bar_width * data_dist_len) / terminal_width).round()
         } else {
-            1_f32
+            1_f64
         }
     }
 
-    fn create_bars(data: &[Complex<f32>], bar_width: f32, terminal_width: f32) -> Vec<(&str, u64)> {
+    fn create_bars(data: &[Complex<f64>], bar_width: f64, terminal_width: f64) -> Vec<(&str, u64)> {
         let mut data_dist_reformed = Vec::new();
 
         {
             let data_dist = data
                 .iter()
                 .map(|x| (x.re * x.re + x.im * x.im).round())
-                .collect::<Vec<f32>>();
+                .collect::<Vec<f64>>();
 
-            let offset = Self::calculate_offset(data_dist.len() as f32, bar_width, terminal_width);
+            let offset = Self::calculate_offset(data_dist.len() as f64, bar_width, terminal_width);
 
             for i in (0..data_dist.len() - offset as usize).step_by(offset as usize) {
-                let mut sum = 0_f32;
+                let mut sum = 0_f64;
 
                 for j in i..i + (offset as usize) {
                     sum += data_dist[j];
@@ -60,13 +60,13 @@ impl<'a> Display<'a> {
         data_dist_reformed
     }
 
-    pub fn update(&mut self, data: &[Complex<f32>]) -> anyhow::Result<()> {
+    pub fn update(&mut self, data: &[Complex<f64>]) -> anyhow::Result<()> {
         let bar_width = self.config.bar_width;
         let terminal_width = self.terminal.size()?.width;
         let bar_style = self.bar_style.clone();
 
         self.terminal.draw(move |f| {
-            let data_dist = Self::create_bars(data, bar_width as f32, terminal_width as f32);
+            let data_dist = Self::create_bars(data, bar_width as f64, terminal_width as f64);
 
             let bar_chart = BarChart::default()
                 .block(Block::default().title(PROGRAM_NAME).borders(Borders::ALL))

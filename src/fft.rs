@@ -1,9 +1,9 @@
 use num_complex::Complex;
-use std::f32::consts::PI;
+use std::f64::consts::PI;
 
-pub fn fft(buf_a: &mut Vec<Complex<f32>>) {
-    fn fft_inner(buf_a: &mut [Complex<f32>], buf_b: &mut [Complex<f32>], n: usize, step: usize) {
-        static I: Complex<f32> = Complex { re: 0.0, im: 1.0 };
+pub fn fft(buf_a: &mut Vec<Complex<f64>>) {
+    fn fft_inner(buf_a: &mut [Complex<f64>], buf_b: &mut [Complex<f64>], n: usize, step: usize) {
+        static I: Complex<f64> = Complex { re: 0.0, im: 1.0 };
 
         if step >= n {
             return;
@@ -15,7 +15,7 @@ pub fn fft(buf_a: &mut Vec<Complex<f32>>) {
         let (left, right) = buf_a.split_at_mut(n / 2);
 
         for i in (0..n).step_by(step * 2) {
-            let t = (-I * PI * (i as f32) / (n as f32)).exp() * buf_b[i + step];
+            let t = (-I * PI * (i as f64) / (n as f64)).exp() * buf_b[i + step];
             left[i / 2] = buf_b[i] + t;
             right[i / 2] = buf_b[i] - t;
         }
@@ -26,8 +26,8 @@ pub fn fft(buf_a: &mut Vec<Complex<f32>>) {
 
     buf_a.append(&mut vec![
         Complex {
-            re: 0_f32,
-            im: 0_f32
+            re: 0_f64,
+            im: 0_f64
         };
         n - n_orig
     ]);
