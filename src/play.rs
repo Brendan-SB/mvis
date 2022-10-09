@@ -28,10 +28,11 @@ pub fn play(config: &Config, audio_file_path: &String) -> anyhow::Result<()> {
     while handle.state() != PlaybackState::Stopped {
         let frame_start = Instant::now();
         let index = (handle.position() * sound.sample_rate as f64) as f32;
-        let start = index.floor() as usize;
-        let end = (index + sound.sample_rate as f32 * config.detail).ceil() as usize;
+        let start = (index.floor() as i32 % sound.frames.len() as i32) as usize;
+        let end = ((index + sound.sample_rate as f32 * config.detail).ceil() as i32
+            % sound.frames.len() as i32) as usize;
 
-        if end >= sound.frames.len() {
+        if start >= end {
             break;
         }
 
