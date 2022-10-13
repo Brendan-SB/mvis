@@ -142,14 +142,6 @@ impl Config {
             None,
         );
         args.option(
-            "s",
-            "sample-interval",
-            "The interval the sample thread should take from the buffer at each step in milliseconds.",
-            "SAMPLE_INTERVAL",
-            Occur::Optional,
-            None,
-        );
-        args.option(
             "d",
             "detail",
             "The detail in each frame.",
