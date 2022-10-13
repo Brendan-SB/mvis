@@ -3,7 +3,10 @@ use std::f64::consts::PI;
 
 pub fn fft(buf_a: &mut Vec<Complex<f64>>) {
     fn fft_inner(buf_a: &mut [Complex<f64>], buf_b: &mut [Complex<f64>], n: usize, step: usize) {
-        static I: Complex<f64> = Complex { re: 0.0, im: 1.0 };
+        static I: Complex<f64> = Complex {
+            re: 0_f64,
+            im: 1_f64,
+        };
 
         if step >= n {
             return;

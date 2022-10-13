@@ -71,7 +71,7 @@ impl Config {
         Self {
             volume: 1_f64,
             detail: 0.1,
-            fps: None,
+            fps: Some(60),
             bar_width: 1,
             style: Style::new(),
         }
@@ -111,7 +111,7 @@ impl Config {
             "Print the default config to standard output.",
         );
         args.option(
-            "f",
+            "F",
             "file",
             "The path to the audio file.",
             "FILE",
@@ -150,10 +150,18 @@ impl Config {
             None,
         );
         args.option(
-            "l",
-            "level-of-detail",
-            "The level between the steps in the sample for loop.",
-            "LEVEL_OF_DETAIL",
+            "d",
+            "detail",
+            "The detail in each frame.",
+            "DETAIL",
+            Occur::Optional,
+            None,
+        );
+        args.option(
+            "f",
+            "fps",
+            "The target frames per second.",
+            "FRAMES_PER_SECOND",
             Occur::Optional,
             None,
         );
