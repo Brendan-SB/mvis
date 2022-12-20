@@ -35,7 +35,7 @@ impl<'a> Display<'a> {
         }
     }
 
-    fn create_bars(data: &[Complex<f64>], bar_width: f64, terminal_width: f64) -> Vec<(&str, u64)> {
+    fn create_bars(data: &[Complex<f64>], bar_width: f64, terminal_width: f64) -> Vec<u64> {
         let mut data_dist_reformed = Vec::new();
 
         {
@@ -53,7 +53,9 @@ impl<'a> Display<'a> {
                     sum += *j;
                 }
 
-                data_dist_reformed.push(("", (sum / offset).round() as u64));
+                let value = (sum / offset).round() as u64;
+
+                data_dist_reformed.push(value);
             }
         }
 
@@ -67,12 +69,19 @@ impl<'a> Display<'a> {
 
         self.terminal.draw(move |f| {
             let data_dist = Self::create_bars(data, bar_width as f64, terminal_width as f64);
-
+            let mean: u64 = data_dist.iter().cloned().sum::<u64>() / (data_dist.len() as u64);
+            let plot_max = (mean as f64 * (mean as f64).log10()) as u64;
+            let plot = data_dist
+                .iter()
+                .cloned()
+                .map(|i| ("", i))
+                .collect::<Vec<_>>();
             let bar_chart = BarChart::default()
                 .block(Block::default().title(PROGRAM_NAME).borders(Borders::ALL))
                 .bar_width(bar_width)
                 .style(bar_style)
-                .data(&data_dist);
+                .max(plot_max)
+                .data(&plot);
 
             f.render_widget(bar_chart, f.size());
         })?;
