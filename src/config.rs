@@ -18,6 +18,7 @@ use tui::{
 };
 
 #[derive(Serialize, Deserialize)]
+#[derive(Default)]
 pub struct Style {
     pub fg: Option<String>,
     pub bg: Option<String>,
@@ -36,17 +37,13 @@ impl Style {
     fn decode_style_value(hex: &Option<String>) -> anyhow::Result<Option<Color>> {
         match hex {
             Some(v) => {
-                if v.len() != 7 || v.chars().next() != Some('#') {
+                if v.len() != 7 || !v.starts_with('#') {
                     return Err(anyhow::Error::msg(IMPROPER_HEX_FORMAT));
                 }
 
                 let decoded = hex::decode(&v[1..7])?;
 
-                Ok(Some(Color::Rgb {
-                    0: decoded[0],
-                    1: decoded[1],
-                    2: decoded[2],
-                }))
+                Ok(Some(Color::Rgb(decoded[0], decoded[1], decoded[2])))
             }
             None => Ok(None),
         }
@@ -62,11 +59,7 @@ impl Style {
     }
 }
 
-impl Default for Style {
-    fn default() -> Self {
-        Self { fg: None, bg: None }
-    }
-}
+
 
 impl Config {
     fn generate_default_config_pretty() -> anyhow::Result<String> {
@@ -87,7 +80,7 @@ impl Config {
             create_dir_all(directory_path)?;
 
             File::create(file_path)?
-                .write_all(&Self::generate_default_config_pretty()?.as_bytes())?
+                .write_all(Self::generate_default_config_pretty()?.as_bytes())?
         }
 
         Ok(())
@@ -166,7 +159,7 @@ impl Config {
     fn from_config(path: String) -> anyhow::Result<Self> {
         let mut contents = String::new();
 
-        File::open(&path)?.read_to_string(&mut contents)?;
+        File::open(path)?.read_to_string(&mut contents)?;
 
         Ok(serde_json::from_str(contents.as_str())?)
     }

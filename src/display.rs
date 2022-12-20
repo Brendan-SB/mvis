@@ -49,8 +49,8 @@ impl<'a> Display<'a> {
             for i in (0..data_dist.len() - offset as usize).step_by(offset as usize) {
                 let mut sum = 0_f64;
 
-                for j in i..i + (offset as usize) {
-                    sum += data_dist[j];
+                for j in data_dist.iter().skip(i).take(offset as usize) {
+                    sum += data_dist[*j as usize];
                 }
 
                 data_dist_reformed.push(("", (sum / offset).round() as u64));
@@ -63,7 +63,7 @@ impl<'a> Display<'a> {
     pub fn update(&mut self, data: &[Complex<f64>]) -> anyhow::Result<()> {
         let bar_width = self.config.bar_width;
         let terminal_width = self.terminal.size()?.width;
-        let bar_style = self.bar_style.clone();
+        let bar_style = self.bar_style;
 
         self.terminal.draw(move |f| {
             let data_dist = Self::create_bars(data, bar_width as f64, terminal_width as f64);

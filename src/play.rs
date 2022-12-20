@@ -18,18 +18,18 @@ pub fn play(config: &Config, audio_file_path: &String) -> anyhow::Result<()> {
 
     io::stdout().flush()?;
 
-    let sound = StaticSoundData::from_file(&audio_file_path, Default::default())?;
+    let sound = StaticSoundData::from_file(audio_file_path, Default::default())?;
 
     println!("Complete.");
 
-    let mut display = Display::new(&config)?;
+    let mut display = Display::new(config)?;
     let handle = manager.play(sound.clone())?;
 
     while handle.state() != PlaybackState::Stopped {
         let frame_start = Instant::now();
         let index = handle.position() * sound.sample_rate as f64;
         let start = (index.floor() as i64 % sound.frames.len() as i64) as usize;
-        let end = ((index + sound.sample_rate as f64 * config.detail as f64).ceil() as i64
+        let end = ((index + sound.sample_rate as f64 * config.detail).ceil() as i64
             % sound.frames.len() as i64) as usize;
 
         if start >= end {
