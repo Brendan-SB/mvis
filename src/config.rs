@@ -17,8 +17,7 @@ use tui::{
     style::{Color, Modifier},
 };
 
-#[derive(Serialize, Deserialize)]
-#[derive(Default)]
+#[derive(Serialize, Deserialize, Default)]
 pub struct Style {
     pub fg: Option<String>,
     pub bg: Option<String>,
@@ -58,8 +57,6 @@ impl Style {
         })
     }
 }
-
-
 
 impl Config {
     fn generate_default_config_pretty() -> anyhow::Result<String> {
