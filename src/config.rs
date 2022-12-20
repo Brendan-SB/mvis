@@ -33,10 +33,6 @@ pub struct Config {
 }
 
 impl Style {
-    fn new() -> Self {
-        Self { fg: None, bg: None }
-    }
-
     fn decode_style_value(hex: &Option<String>) -> anyhow::Result<Option<Color>> {
         match hex {
             Some(v) => {
@@ -66,19 +62,15 @@ impl Style {
     }
 }
 
-impl Config {
-    fn new() -> Self {
-        Self {
-            volume: 1_f64,
-            detail: 0.1,
-            fps: Some(60),
-            bar_width: 1,
-            style: Style::new(),
-        }
+impl Default for Style {
+    fn default() -> Self {
+        Self { fg: None, bg: None }
     }
+}
 
+impl Config {
     fn generate_default_config_pretty() -> anyhow::Result<String> {
-        Ok(serde_json::to_string_pretty(&Self::new())?)
+        Ok(serde_json::to_string_pretty(&Self::default())?)
     }
 
     pub fn print_default_config() -> anyhow::Result<()> {
@@ -220,5 +212,17 @@ impl Config {
         }
 
         Ok(config)
+    }
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            volume: 1_f64,
+            detail: 0.1,
+            fps: Some(60),
+            bar_width: 1,
+            style: Style::default(),
+        }
     }
 }

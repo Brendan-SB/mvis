@@ -28,8 +28,8 @@ impl<'a> Display<'a> {
     }
 
     fn calculate_offset(data_dist_len: f64, bar_width: f64, terminal_width: f64) -> f64 {
-        if terminal_width > bar_width && terminal_width > 0_f64 {
-            ((1_f64 + data_dist_len + bar_width * data_dist_len) / terminal_width).round()
+        if terminal_width > bar_width && terminal_width > 0_f64 && data_dist_len > 0_f64 {
+            ((data_dist_len + bar_width / data_dist_len) / terminal_width).round()
         } else {
             1_f64
         }
