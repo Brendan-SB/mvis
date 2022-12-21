@@ -41,7 +41,7 @@ impl<'a> Display<'a> {
         {
             let data_dist = data
                 .iter()
-                .map(|x| (x.re * x.re + x.im * x.im).round())
+                .map(|x| x.re * x.re + x.im * x.im)
                 .collect::<Vec<f64>>();
 
             let offset = Self::calculate_offset(data_dist.len() as f64, bar_width, terminal_width);
@@ -69,18 +69,16 @@ impl<'a> Display<'a> {
 
         self.terminal.draw(move |f| {
             let data_dist = Self::create_bars(data, bar_width as f64, terminal_width as f64);
-            let mean: u64 = data_dist.iter().cloned().sum::<u64>() / (data_dist.len() as u64);
-            let plot_max = (mean as f64 * (mean as f64).log10()) as u64;
             let plot = data_dist
                 .iter()
                 .cloned()
-                .map(|i| ("", i))
+                .map(|i| ("", (i as f64 * 1_f64 / (i as f64).sqrt()) as u64
+                     ))
                 .collect::<Vec<_>>();
             let bar_chart = BarChart::default()
                 .block(Block::default().title(PROGRAM_NAME).borders(Borders::ALL))
                 .bar_width(bar_width)
                 .style(bar_style)
-                .max(plot_max)
                 .data(&plot);
 
             f.render_widget(bar_chart, f.size());
