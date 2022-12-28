@@ -1,7 +1,7 @@
 use crate::{config::Config, display::Display, fft::fft};
 use kira::{
-    manager::{backend::cpal::CpalBackend, AudioManager, AudioManagerSettings},
-    sound::static_sound::{PlaybackState, StaticSoundData},
+    manager::{backend::cpal::CpalBackend, AudioManager},
+    sound::static_sound::{PlaybackState, StaticSoundData, StaticSoundSettings},
 };
 use num_complex::Complex;
 use std::{
@@ -12,13 +12,16 @@ use std::{
 };
 
 pub fn play(config: &Config, audio_file_path: &String) -> anyhow::Result<()> {
-    let mut manager = AudioManager::<CpalBackend>::new(AudioManagerSettings::default())?;
+    let mut manager = AudioManager::<CpalBackend>::new(Default::default())?;
 
     print!("Loading sound...");
 
     io::stdout().flush()?;
 
-    let sound = StaticSoundData::from_file(audio_file_path, Default::default())?;
+    let sound = StaticSoundData::from_file(
+        audio_file_path,
+        StaticSoundSettings::new().volume(config.volume),
+    )?;
 
     println!("Complete.");
 
