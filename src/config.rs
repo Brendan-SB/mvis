@@ -28,7 +28,6 @@ pub struct Config {
     pub volume: f64,
     pub detail: f64,
     pub fps: Option<usize>,
-    pub bar_width: u16,
     pub style: Style,
 }
 
@@ -191,16 +190,6 @@ impl Config {
             config.fps = Some(fps);
         }
 
-        if let Ok(bar_width) = args.validated_value_of(
-            "bar-width",
-            &[
-                Box::new(OrderValidation::new(Order::GreaterThanOrEqual, 1)),
-                Box::new(OrderValidation::new(Order::LessThanOrEqual, 10)),
-            ],
-        ) {
-            config.bar_width = bar_width;
-        }
-
         Ok(config)
     }
 }
@@ -211,7 +200,6 @@ impl Default for Config {
             volume: 1_f64,
             detail: 0.1,
             fps: Some(60),
-            bar_width: 1,
             style: Style::default(),
         }
     }
