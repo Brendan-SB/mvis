@@ -73,7 +73,7 @@ impl<'a> Display<'a> {
             let plot = data_dist
                 .iter()
                 .cloned()
-                .map(|i| ("", (i as f64 * 1_f64 / (i as f64).sqrt()) as u64))
+                .map(|i| ("", (i as f64 / (i as f64).sqrt()) as u64))
                 .collect::<Vec<_>>();
             let bar_chart = BarChart::default()
                 .block(Block::default().title(PROGRAM_NAME).borders(Borders::ALL))
