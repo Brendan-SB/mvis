@@ -1,3 +1,4 @@
 /target
 ~/.config/mvis/config
 *.mp3
+Cargo.lock
