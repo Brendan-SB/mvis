@@ -28,14 +28,10 @@ impl Display {
 
     fn calculate_offset(data_dist_len: f64, terminal_width: f64) -> f64 {
         if terminal_width > 0_f64 && data_dist_len > 0_f64 {
-            let o = ((data_dist_len + 1_f64 / data_dist_len) / terminal_width).round();
-
-            if o > 0_f64 {
-                return o * 2_f64;
-            }
+            ((data_dist_len + 1_f64 / data_dist_len) / terminal_width).round()
+        } else {
+            1_f64
         }
-
-        1_f64
     }
 
     fn create_bars(data: &[Complex<f64>], terminal_width: f64) -> Vec<(&str, u64)> {
