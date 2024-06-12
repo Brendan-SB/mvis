@@ -1,6 +1,5 @@
 mod config;
 mod display;
-mod fft;
 mod play;
 mod run;
 
