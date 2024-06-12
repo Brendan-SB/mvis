@@ -48,7 +48,7 @@ impl Display {
             .collect::<Vec<_>>()
             .into_par_iter()
             .map(|i| {
-                let sum: f64 = data_dist.par_iter().skip(i).take(offset as usize).sum();
+                let sum: f64 = data_dist.iter().skip(i).take(offset as usize).sum();
                 let value = (sum / offset).sqrt().round() as u64;
 
                 ("", value)
