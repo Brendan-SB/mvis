@@ -1,6 +1,6 @@
 use crate::{config::Config, display::Display};
 use kira::{
-    manager::{backend::cpal::CpalBackend, AudioManager},
+    manager::{backend::DefaultBackend, AudioManager},
     sound::static_sound::{PlaybackState, StaticSoundData, StaticSoundSettings},
 };
 use num_complex::Complex;
@@ -13,7 +13,7 @@ use std::{
 };
 
 pub fn play(config: &Config, audio_file_path: &String) -> anyhow::Result<()> {
-    let mut manager = AudioManager::<CpalBackend>::new(Default::default())?;
+    let mut manager = AudioManager::<DefaultBackend>::new(Default::default())?;
 
     print!("Loading sound...");
 
@@ -86,6 +86,7 @@ pub fn fft(buf_a: &mut Vec<Complex<f64>>) {
 
         for i in (0..n).step_by(step * 2) {
             let t = (-I * PI * (i as f64) / (n as f64)).exp() * buf_b[i + step];
+
             left[i / 2] = buf_b[i] + t;
             right[i / 2] = buf_b[i] - t;
         }
